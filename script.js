@@ -1,6 +1,6 @@
 function extractDetails(text) {
     const companyRegex = /(AL ARFAJ|[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)+ Co|[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)+ Ltd)/g; // Şirket adları
-    const nameRegex = /(Dr\.|Mr\.|Ms\.)?\s?[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)?/g; // İsim ve soyisim (Unvan ile birlikte)
+    const nameRegex = /(Dr\.|Mr\.|Ms\.)?\s?[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)?/g; // İsim ve soyisim
     const positionRegex = /(Manager|Director|Engineer|Specialist|Business Development)/g; // Pozisyon
     const phoneRegex = /(\+?[0-9\-\s().]+)/g; // Telefon numarası
     const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g; // E-posta adresi
@@ -46,9 +46,14 @@ function extractDetails(text) {
     return data;
 }
 
-document.getElementById('upload').onchange = function(event) {
-    const files = event.target.files;
+document.getElementById('start').onclick = function() {
+    const files = document.getElementById('upload').files;
     let allExtractedData = [];
+
+    // İlerleme çubuğunu sıfırla
+    const progressBar = document.getElementById('progressBar');
+    progressBar.value = 0;
+    progressBar.max = files.length;
 
     // Her bir dosya için işlem yap
     for (let i = 0; i < files.length; i++) {
@@ -58,7 +63,15 @@ document.getElementById('upload').onchange = function(event) {
             file,
             'eng',
             {
-                logger: (m) => console.log(m),
+                logger: (m) => {
+                    console.log(m);
+                    // Yüzdelik ilerlemeyi güncelle
+                    if (m.status === 'recognizing text') {
+                        const percent = Math.round(m.progress * 100);
+                        progressBar.value = i + percent / 100;
+                        document.getElementById('progressText').innerText = `İşlem Yüzdesi: ${percent}%`;
+                    }
+                },
             }
         ).then(({ data: { text } }) => {
             const extractedData = extractDetails(text);
