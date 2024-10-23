@@ -1,12 +1,12 @@
 // OCR sonuçlarını işleyen fonksiyon
 function extractDetails(text) {
-    const companyRegex = /(FORLAM-RAIL|HARSCO|AMSTED|KONCAR|MARTINUS|JORS|Schwihag|Kolowag|Holland|Lantech|Matisa|Bonatrans|Duagon)/g;
+    const companyRegex = /(FORLAM-RAIL|HARSCO|AMSTED|KONCAR|MARTINUS|JORS|Schwihag|Kolowag|Holland|Jorsa|Forlam|Harsco Rail)/g;
     const nameRegex = /(Dr\.|Mr\.|Ms\.|Mrs\.)?\s?[A-Z][a-z]+(?:\s[A-Z][a-z]+)?/g;
-    const positionRegex = /(Manager|Director|Engineer|Specialist|Marketing|Sales|Development|Consultant)/g;
+    const positionRegex = /(Manager|Director|Engineer|Specialist|Business Development|Imports|Marketing)/g;
     const phoneRegex = /(\+?[0-9]{1,4}[\s.-]?[0-9]{1,4}[\s.-]?[0-9]{1,4}[\s.-]?[0-9]{1,4})/g;
     const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-    const cityRegex = /(Jeddah|Dubai|Riyadh|Zagreb|Düsseldorf|Crissier|Nürnberg|Munich)/g;
-    const countryRegex = /(Saudi Arabia|UAE|Germany|France|Australia|Switzerland|Czech Republic)/g;
+    const cityRegex = /(Jeddah|Dubai|Riyadh|Abu Dhabi|Zagreb|Düsseldorf)/g;
+    const countryRegex = /(Saudi Arabia|UAE|United Arab Emirates|Germany|France|Australia)/g;
 
     const companies = text.match(companyRegex) || ["Unknown Company"];
     const names = text.match(nameRegex) || ["Responsible"];
@@ -24,22 +24,26 @@ function extractDetails(text) {
         };
     });
 
+    const uniqueCompanies = [...new Set(companies)];
+    const uniqueCities = [...new Set(cities)];
+    const uniqueCountries = [...new Set(countries)];
+
     const data = namesList.map((nameObj, index) => ({
-        "Company": companies[index] || "Unknown Company",
+        "Company": uniqueCompanies[0] || "Unknown",
         "Name": nameObj.Name,
         "Surname": nameObj.Surname,
         "Position": positions[index] || "Responsible",
         "Work Phone": phones[index] || "",
         "Other Phone": phones[index + 1] || "",
         "Email": emails[index] || "No Email",
-        "City": cities[index] || "Unknown City",
-        "Country": countries[index] || "Unknown Country"
+        "City": uniqueCities[0] || "Unknown",
+        "Country": uniqueCountries[0] || "Unknown"
     }));
 
     return data;
 }
 
-// Tesseract işlemi
+// İşlem başlangıcı
 $('#start').on('click', function() {
     $('#progressBar').css('width', '0%').attr('aria-valuenow', 0).text('0%');
     $('#progressText').text('İşlem başladı...');
@@ -88,31 +92,50 @@ function displayTable(data) {
 
     tableHtml += `</tbody></table>`;
     $('#output').html(tableHtml);
-    $('#dataTable').DataTable();
+    $('#dataTable').DataTable(); // DataTable ile sıralama ve filtreleme ekle
 }
 
-// ChatGPT API Entegrasyonu için fonksiyon
-async function fetchChatGPTResponse(text) {
-    const response = await fetch("https://api.openai.com/v1/completions", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer YOUR_API_KEY`
-        },
-        body: JSON.stringify({
-            model: "text-davinci-003",
-            prompt: `Extract information from this text: ${text}`,
-            max_tokens: 1000
-        })
+// ChatGPT ile işlem başlatma
+$('#startChatGPT').on('click', function() {
+    $('#progressBar').css('width', '0%').attr('aria-valuenow', 0).text('0%');
+    $('#progressText').text('ChatGPT işlemi başlatıldı...');
+    
+    const files = $('#upload')[0].files;
+    if (files.length === 0) {
+        alert('Lütfen dosya yükleyin!');
+        return;
+    }
+
+    Array.from(files).forEach((file, index) => {
+        Tesseract.recognize(file, 'eng')
+            .then(async function(result) {
+                const extractedData = extractDetails(result.data.text);
+                displayChatGPTTable(extractedData);
+            });
+    });
+});
+
+// ChatGPT Tablosunu göster
+function displayChatGPTTable(data) {
+    let tableHtml = `<table id="chatGPTTable" class="table table-striped table-bordered">
+        <thead><tr>
+        <th>Company</th><th>Name</th><th>Surname</th><th>Position</th>
+        <th>Work Phone</th><th>Other Phone</th><th>Email</th><th>City</th><th>Country</th></tr></thead><tbody>`;
+
+    data.forEach(row => {
+        tableHtml += `<tr>
+            <td>${row.Company}</td>
+            <td>${row.Name}</td>
+            <td>${row.Surname}</td>
+            <td>${row.Position}</td>
+            <td>${row["Work Phone"]}</td>
+            <td>${row["Other Phone"]}</td>
+            <td>${row.Email}</td>
+            <td>${row.City}</td>
+            <td>${row.Country}</td></tr>`;
     });
 
-    const data = await response.json();
-    return data.choices[0].text;
-}
-
-// ChatGPT Yanıtını Tabloya Eklemek
-async function useChatGPT(text) {
-    const chatGPTResult = await fetchChatGPTResponse(text);
-    console.log("ChatGPT Result:", chatGPTResult);
-    // ChatGPT'nin sonuçlarını işleyip tabloya ekleyin
+    tableHtml += `</tbody></table>`;
+    $('#chatgpt-output').html(tableHtml);
+    $('#chatGPTTable').DataTable();
 }
