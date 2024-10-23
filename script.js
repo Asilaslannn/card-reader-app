@@ -4,9 +4,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const startProcessButton = document.getElementById('start-process');
     const dataTable = document.getElementById('data-table').getElementsByTagName('tbody')[0];
     let uploadedFiles = [];
-    
+
     // OpenAI API anahtarı (bu güvenli bir sunucuda saklanmalı)
-    const apiKey = "sk-RO0Pr2EW4Acg3SIk3R0CBZ1sfBNwQVPXRtPhwodVCtT3BlbkFJ4ppPQzIIBnO6U6mpEUdmCSmfKXj0ntgAvBtestsjEA";  // API anahtarını buraya ekleyin
+    const apiKey = "YOUR_OPENAI_API_KEY";  // API anahtarını buraya ekleyin
 
     // Dosya yüklendiğinde "Başlat" butonunu aktif et
     fileInput.addEventListener('change', function (event) {
