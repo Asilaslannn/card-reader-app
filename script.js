@@ -61,4 +61,148 @@ $('#upload').on('change', function(event) {
     }
 });
 
-// PDF ve Excel için dışa aktarma fonksiyonları buraya eklenecek...
+$('#start').on('click', function () {
+    $('#progressBar').css('width', '0%').attr('aria-valuenow', 0).text('0%');
+    $('#progressText').text('İşlem başladı...');
+
+    const files = $('#upload')[0].files;
+    if (files.length === 0) {
+        alert('Lütfen dosya yükleyin!');
+        return;
+    }
+
+    Array.from(files).forEach((file, index) => {
+        Tesseract.recognize(file, 'eng', {
+            logger: (m) => {
+                const progress = Math.floor(m.progress * 100);
+                $('#progressBar').css('width', progress + '%').attr('aria-valuenow', progress).text(progress + '%');
+                $('#progressText').text(`İşleniyor: ${file.name}...`);
+            },
+        }).then(function (result) {
+            const extractedData = extractDetails(result.data.text);
+            displayTable(extractedData);
+            $('#progressBar').css('width', '100%').attr('aria-valuenow', 100).text('100%');
+            $('#progressText').text('İşlem %100 tamamlandı.');
+        }).catch(function (error) {
+            console.error('OCR hatası:', error);
+            $('#progressText').text('Bir hata oluştu.');
+        });
+    });
+});
+
+$('#startChatGPT').on('click', function () {
+    $('#progressBar').css('width', '0%').attr('aria-valuenow', 0).text('0%');
+    $('#progressText').text('ChatGPT işlemi başlatıldı...');
+
+    const files = $('#upload')[0].files;
+    if (files.length === 0) {
+        alert('Lütfen dosya yükleyin!');
+        return;
+    }
+
+    Array.from(files).forEach((file, index) => {
+        Tesseract.recognize(file, 'eng').then(async function (result) {
+            try {
+                const chatGPTProcessedData = await useChatGPT(result.data.text); // ChatGPT API çağrısı
+                displayChatGPTTable(chatGPTProcessedData); // Sonuçları tabloya yerleştir
+            } catch (error) {
+                console.error('ChatGPT hatası:', error);
+                $('#progressText').text('ChatGPT işleminde bir hata oluştu.');
+            }
+        });
+    });
+});
+
+// ChatGPT API çağrısı
+async function fetchChatGPTResponse(text) {
+    try {
+        const response = await fetch("https://api.openai.com/v1/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer YOUR_API_KEY` // API anahtarınızı kontrol edin
+            },
+            body: JSON.stringify({
+                model: "text-davinci-003",
+                prompt: `Extract information from this text: ${text}`,
+                max_tokens: 1000,
+            }),
+        });
+
+        const data = await response.json();
+        return data.choices[0].text;
+    } catch (error) {
+        console.error('ChatGPT API çağrısı hatası:', error);
+        throw error;
+    }
+}
+
+// Veriyi Excel olarak dışa aktarma
+function exportToExcel(data) {
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+    XLSX.writeFile(workbook, "OCR_Data.xlsx");
+}
+
+// Veriyi PDF olarak dışa aktarma
+function exportToPDF(data) {
+    const doc = new jsPDF();
+    doc.text(20, 20, 'OCR Data');
+    let row = 30;
+    data.forEach((item) => {
+        doc.text(20, row, JSON.stringify(item));
+        row += 10;
+    });
+    doc.save("OCR_Data.pdf");
+}
+
+// Tabloyu gösterme
+function displayTable(data) {
+    let tableHtml = `<table id="dataTable" class="table table-striped table-bordered">
+        <thead><tr>
+        <th>Company</th><th>Name</th><th>Surname</th><th>Position</th>
+        <th>Work Phone</th><th>Other Phone</th><th>Email</th><th>City</th><th>Country</th></tr></thead><tbody>`;
+
+    data.forEach(row => {
+        tableHtml += `<tr>
+            <td>${row.Company}</td>
+            <td>${row.Name}</td>
+            <td>${row.Surname}</td>
+            <td>${row.Position}</td>
+            <td>${row["Work Phone"]}</td>
+            <td>${row["Other Phone"]}</td>
+            <td>${row.Email}</td>
+            <td>${row.City}</td>
+            <td>${row.Country}</td></tr>`;
+    });
+
+    tableHtml += `</tbody></table>`;
+    $('#output').html(tableHtml);
+    $('#dataTable').DataTable(); // DataTable'ı yeniden başlatır
+}
+
+// ChatGPT tablosunu gösterme
+function displayChatGPTTable(data) {
+    let tableHtml = `<table id="chatGPTTable" class="table table-striped table-bordered">
+        <thead><tr>
+        <th>Company</th><th>Name</th><th>Surname</th><th>Position</th>
+        <th>Work Phone</th><th>Other Phone</th><th>Email</th><th>City</th><th>Country</th></tr></thead><tbody>`;
+
+    data.forEach(row => {
+        tableHtml += `<tr>
+            <td>${row.Company}</td>
+            <td>${row.Name}</td>
+            <td>${row.Surname}</td>
+            <td>${row.Position}</td>
+            <td>${row["Work Phone"]}</td>
+            <td>${row["Other Phone"]}</td>
+            <td>${row.Email}</td>
+            <td>${row.City}</td>
+            <td>${row.Country}</td></tr>`;
+    });
+
+    tableHtml += `</tbody></table>`;
+    $('#chatgpt-output').html(tableHtml);
+    $('#chatGPTTable').DataTable(); // DataTable'ı yeniden başlatır
+}
