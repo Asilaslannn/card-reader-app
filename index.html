@@ -1,10 +1,22 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Card Reader App</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Reader App</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@v2.1.4/dist/tesseract.min.js"></script>
 </head>
 <body>
-<h1>Card Reader App</h1>
-<p>Upload your files here.</p>
+    <h1>Card Reader App</h1>
+    <p>Upload your files here.</p>
+
+    <!-- Dosya yükleme alanı -->
+    <input type="file" id="upload" accept="image/*,application/pdf">
+
+    <!-- OCR ile çıkan metni göstermek için -->
+    <pre id="output"></pre>
+
+    <script src="script.js"></script>
 </body>
 </html>
