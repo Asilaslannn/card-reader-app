@@ -3,63 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatGPT Entegrasyonu</title>
+    <title>Veri Yükleme ve Tablo Oluşturma</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
+            margin: 20px;
             background-color: #f4f4f4;
         }
         h1 {
             text-align: center;
             color: #333;
+            margin-bottom: 20px;
         }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        .upload-area {
+            text-align: center;
+            margin-bottom: 30px;
         }
-        textarea {
-            width: 100%;
-            height: 100px;
-            padding: 10px;
+        .upload-area label {
             font-size: 16px;
-            border: 1px solid #ddd;
+            font-weight: bold;
+        }
+        .upload-area input[type="file"] {
+            margin-top: 10px;
+            font-size: 16px;
+            padding: 10px;
             border-radius: 5px;
-            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            width: 80%;
+            max-width: 600px;
+        }
+        .progress-container {
+            width: 80%;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 30px;
+            background-color: #4caf50;
+            border-radius: 10px;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+            transition: width 0.4s ease;
+        }
+        table {
+            width: 100%;
+            max-width: 1000px;
+            margin: 20px auto;
+            border-collapse: collapse;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: white;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            cursor: pointer;
+        }
+        th:hover {
+            background-color: #ddd;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .download-buttons {
+            text-align: center;
+            margin-top: 20px;
         }
         button {
-            width: 100%;
-            padding: 10px;
             background-color: #4caf50;
             color: white;
             border: none;
-            border-radius: 5px;
+            padding: 10px 20px;
+            margin: 10px;
             font-size: 16px;
+            border-radius: 5px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
         button:hover {
             background-color: #45a049;
         }
-        .response {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f1f1f1;
-            border-radius: 5px;
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
         }
     </style>
 </head>
 <body>
 
-    <h1>ChatGPT ile Etkileşime Geçin</h1>
-    <div class="container">
-        <textarea id="user-input" placeholder="Bir soru sorun..."></textarea>
-        <button id="submit-btn">Gönder</button>
-        <div class="response" id="response-output"></div>
+    <h1>Dosya Yükleme ve Tablo Oluşturma</h1>
+
+    <div class="upload-area">
+        <label for="file-upload">Dosyaları Yükleyin (PDF veya JPG):</label>
+        <input type="file" id="file-upload" multiple accept=".pdf, .jpg, .jpeg, .png">
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progress-bar">0%</div>
+    </div>
+
+    <button id="start-process" disabled>Başlat</button>
+
+    <h2>İşlenen Veriler:</h2>
+    <table id="data-table">
+        <thead>
+            <tr>
+                <th>Şirketin Adı</th>
+                <th>Kişinin Adı</th>
+                <th>Kişinin Soyadı</th>
+                <th>Kişinin Pozisyonu</th>
+                <th>Kişinin Numarası</th>
+                <th>Şirketin Numarası</th>
+                <th>Kişinin Mail Adresi</th>
+                <th>Şirketin Mail Adresi</th>
+                <th>Şehir</th>
+                <th>Ülke</th>
+                <th>Website</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Veriler buraya eklenecek -->
+        </tbody>
+    </table>
+
+    <div class="download-buttons">
+        <button id="download-excel">Excel Olarak İndir</button>
+        <button id="download-pdf">PDF Olarak İndir</button>
     </div>
 
     <script src="script.js"></script>
