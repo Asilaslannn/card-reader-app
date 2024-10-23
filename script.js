@@ -1,31 +1,52 @@
 document.addEventListener('DOMContentLoaded', function () {
     const fileInput = document.getElementById('file-upload');
     const progressBar = document.getElementById('progress-bar');
+    const startProcessButton = document.getElementById('start-process');
+    const statusText = document.getElementById('status-text');
     const dataTable = document.getElementById('data-table').getElementsByTagName('tbody')[0];
     let uploadedFiles = 0;
+    let filesToProcess = [];
 
-    // Dosya yükleme işlemi
+    // Dosya yüklendiğinde "Başlat" butonunu aktif et
     fileInput.addEventListener('change', function (event) {
-        const files = event.target.files;
-        const totalFiles = files.length;
+        filesToProcess = event.target.files;
+        if (filesToProcess.length > 0) {
+            startProcessButton.disabled = false;
+            statusText.innerText = `${filesToProcess.length} dosya yüklendi, başlatmak için 'Başlat' butonuna basın.`;
+        } else {
+            startProcessButton.disabled = true;
+            statusText.innerText = 'Henüz bir dosya yüklenmedi.';
+        }
+    });
 
-        // İlerleme çubuğunu başlat
+    // "Başlat" butonuna basıldığında işlemi başlat
+    startProcessButton.addEventListener('click', function () {
         progressBar.style.width = '0%';
         progressBar.innerText = '0%';
         uploadedFiles = 0;
-
-        // Her dosya için işlem başlat
-        Array.from(files).forEach((file, index) => {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                // Burada dosyanın içeriği okunuyor (ChatGPT'ye gönderilebilir)
-                processFile(file);
-                uploadedFiles++;
-                updateProgressBar(uploadedFiles, totalFiles);
-            };
-            reader.readAsDataURL(file); // Bu dosyayı tarayıcıda okuma işlemi
-        });
+        statusText.innerText = 'İşlem başlatıldı, dosyalar işleniyor...';
+        processFiles();
     });
+
+    // Dosya işleme işlemi
+    function processFiles() {
+        Array.from(filesToProcess).forEach((file, index) => {
+            setTimeout(() => {
+                statusText.innerText = `${file.name} işleniyor...`;
+
+                // Burada dosya içeriği işleniyor olacak (ChatGPT API entegrasyonu yapılabilir)
+                processFile(file);
+
+                uploadedFiles++;
+                updateProgressBar(uploadedFiles, filesToProcess.length);
+
+                if (uploadedFiles === filesToProcess.length) {
+                    statusText.innerText = 'Tüm dosyalar başarıyla işlendi.';
+                    startProcessButton.disabled = true;
+                }
+            }, 1000 * index); // Her dosya için 1 saniyelik gecikme
+        });
+    }
 
     // İlerleme çubuğunu güncelle
     function updateProgressBar(uploaded, total) {
@@ -37,37 +58,33 @@ document.addEventListener('DOMContentLoaded', function () {
     // Dosya işleme (Placeholder) – ChatGPT'ye API entegrasyonu yapılabilir
     function processFile(file) {
         // Örnek veri ekleme (gerçek veri yerine)
-        const exampleData = [
-            {
-                company: "ACME Corp",
-                firstName: "John",
-                lastName: "Doe",
-                position: "Manager",
-                personPhone: "+123456789",
-                companyPhone: "+987654321",
-                personEmail: "john.doe@acme.com",
-                companyEmail: "info@acme.com",
-                city: "New York",
-                country: "USA",
-                website: "www.acme.com"
-            }
-        ];
+        const exampleData = {
+            company: "ACME Corp",
+            firstName: "John",
+            lastName: "Doe",
+            position: "Manager",
+            personPhone: "+123456789",
+            companyPhone: "+987654321",
+            personEmail: "john.doe@acme.com",
+            companyEmail: "info@acme.com",
+            city: "New York",
+            country: "USA",
+            website: "www.acme.com"
+        };
 
         // Tabloda verileri göster
-        exampleData.forEach(data => {
-            const row = dataTable.insertRow();
-            row.insertCell(0).innerText = data.company;
-            row.insertCell(1).innerText = data.firstName || "Responsible";
-            row.insertCell(2).innerText = data.lastName || ".";
-            row.insertCell(3).innerText = data.position || "Responsible";
-            row.insertCell(4).innerText = data.personPhone || "";
-            row.insertCell(5).innerText = data.companyPhone || "";
-            row.insertCell(6).innerText = data.personEmail || "";
-            row.insertCell(7).innerText = data.companyEmail || "";
-            row.insertCell(8).innerText = data.city || "";
-            row.insertCell(9).innerText = data.country || "";
-            row.insertCell(10).innerText = data.website || "";
-        });
+        const row = dataTable.insertRow();
+        row.insertCell(0).innerText = exampleData.company;
+        row.insertCell(1).innerText = exampleData.firstName || "Responsible";
+        row.insertCell(2).innerText = exampleData.lastName || ".";
+        row.insertCell(3).innerText = exampleData.position || "Responsible";
+        row.insertCell(4).innerText = exampleData.personPhone || "";
+        row.insertCell(5).innerText = exampleData.companyPhone || "";
+        row.insertCell(6).innerText = exampleData.personEmail || "";
+        row.insertCell(7).innerText = exampleData.companyEmail || "";
+        row.insertCell(8).innerText = exampleData.city || "";
+        row.insertCell(9).innerText = exampleData.country || "";
+        row.insertCell(10).innerText = exampleData.website || "";
     }
 
     // Excel indirme işlemi
