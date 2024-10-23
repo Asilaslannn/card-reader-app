@@ -1,6 +1,6 @@
 function extractDetails(text) {
     const companyRegex = /(AL ARFAJ|[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)+ Co|[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)+ Ltd)/g; // Şirket adları
-    const nameRegex = /(Dr\.?\s?[A-Z][a-z]+(?:\s[A-Z][a-z]+)?)/g; // İsim ve soyisim
+    const nameRegex = /(Dr\.|Mr\.|Ms\.)?\s?[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)?/g; // İsim ve soyisim (Unvan ile birlikte)
     const positionRegex = /(Manager|Director|Engineer|Specialist|Business Development)/g; // Pozisyon
     const phoneRegex = /(\+?[0-9\-\s().]+)/g; // Telefon numarası
     const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g; // E-posta adresi
@@ -16,18 +16,34 @@ function extractDetails(text) {
     const cities = text.match(cityRegex) || ["Unknown City"];
     const countries = text.match(countryRegex) || ["Unknown Country"];
 
-    // Tüm bilgileri tek bir satırda toplamak için veri işleme
-    return [{
-        "Company": companies[0],
-        "Name": names[0] || "Responsible",
-        "Surname": names[0] ? names[0].split(" ")[1] || "." : ".",
-        "Position": positions[0] || "Responsible",
-        "Work Phone": phones[0] || "",
-        "Other Phone": phones[1] || "",
-        "Email": emails[0] || "No Email",
-        "City": cities[0] || "Unknown",
-        "Country": countries[0] || "Unknown"
-    }];
+    // İsim ve soyisim ayrımı
+    const namesList = names.map(name => {
+        const nameParts = name.split(" ");
+        return {
+            "Name": nameParts[0] || "Responsible",
+            "Surname": nameParts[1] || "."
+        };
+    });
+
+    // Şirket, şehir, ülke bilgilerinde tekrarları kaldırma
+    const uniqueCompanies = [...new Set(companies)];
+    const uniqueCities = [...new Set(cities)];
+    const uniqueCountries = [...new Set(countries)];
+
+    // Her bir veri tipini tablo için formatla
+    const data = namesList.map((nameObj, index) => ({
+        "Company": uniqueCompanies[0] || "Unknown",
+        "Name": nameObj.Name,
+        "Surname": nameObj.Surname,
+        "Position": positions[index] || "Responsible",
+        "Work Phone": phones[index] || "",
+        "Other Phone": phones[index + 1] || "",
+        "Email": emails[index] || "No Email",
+        "City": uniqueCities[0] || "Unknown",
+        "Country": uniqueCountries[0] || "Unknown"
+    }));
+
+    return data;
 }
 
 document.getElementById('upload').onchange = function(event) {
