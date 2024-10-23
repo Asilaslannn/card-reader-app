@@ -1,1 +1,59 @@
-body { font-family: Arial, sans-serif; }
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
+
+h1 {
+    color: #333;
+    text-align: center;
+}
+
+p {
+    color: #555;
+    text-align: center;
+}
+
+input[type="file"] {
+    display: block;
+    margin: 20px auto;
+}
+
+button {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+#progressBar {
+    display: block;
+    margin: 20px auto;
+    height: 25px;
+}
+
+#progressText {
+    text-align: center;
+    color: #333;
+    font-weight: bold;
+}
+
+#output {
+    margin: 20px auto;
+    padding: 20px;
+    background-color: white;
+    border: 1px solid #ccc;
+    width: 80%;
+    white-space: pre-wrap;
+    font-family: monospace;
+    font-size: 14px;
+    color: #333;
+}
