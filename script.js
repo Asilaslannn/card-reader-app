@@ -1,13 +1,14 @@
 // OCR sonuçlarını işleyen fonksiyon
 function extractDetails(text) {
-    const companyRegex = /(AL ARFAJ|[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)+ Co|[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)+ Ltd|[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)+ IMPORTS|[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)+ COMMERCIAL)/g;
+    const companyRegex = /(FORLAM-RAIL|HARSCO|AMSTED|KONCAR|MARTINUS|JORS|Schwihag|Kolowag|Holland|Jorsa|Forlam|Harsco Rail)/g;
     const nameRegex = /(Dr\.|Mr\.|Ms\.|Mrs\.)?\s?[A-Z][a-z]+(?:\s[A-Z][a-z]+)?/g;
-    const positionRegex = /(Manager|Director|Engineer|Specialist|Business Development|Imports)/g;
-    const phoneRegex = /(\+?[0-9\-\s().]+)/g;
+    const positionRegex = /(Manager|Director|Engineer|Specialist|Business Development|Imports|Marketing)/g;
+    const phoneRegex = /(\+?[0-9]{1,4}[\s.-]?[0-9]{1,4}[\s.-]?[0-9]{1,4}[\s.-]?[0-9]{1,4})/g;
     const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-    const cityRegex = /(Jeddah|Dubai|Riyadh|Abu Dhabi)/g;
-    const countryRegex = /(Saudi Arabia|UAE|United Arab Emirates)/g;
+    const cityRegex = /(Jeddah|Dubai|Riyadh|Abu Dhabi|Zagreb|Düsseldorf)/g;
+    const countryRegex = /(Saudi Arabia|UAE|United Arab Emirates|Germany|France|Australia)/g;
 
+    // Verileri yakala
     const companies = text.match(companyRegex) || ["Unknown Company"];
     const names = text.match(nameRegex) || ["Responsible"];
     const positions = text.match(positionRegex) || ["Responsible"];
@@ -16,6 +17,7 @@ function extractDetails(text) {
     const cities = text.match(cityRegex) || ["Unknown City"];
     const countries = text.match(countryRegex) || ["Unknown Country"];
 
+    // İsim ve soyisim ayrımı
     const namesList = names.map(name => {
         const nameParts = name.split(" ");
         return {
@@ -24,10 +26,12 @@ function extractDetails(text) {
         };
     });
 
+    // Tekrarlayan verileri temizle
     const uniqueCompanies = [...new Set(companies)];
     const uniqueCities = [...new Set(cities)];
     const uniqueCountries = [...new Set(countries)];
 
+    // Tablo için düzenlenmiş veri formatı
     const data = namesList.map((nameObj, index) => ({
         "Company": uniqueCompanies[0] || "Unknown",
         "Name": nameObj.Name,
@@ -43,91 +47,54 @@ function extractDetails(text) {
     return data;
 }
 
-// Tabloyu oluşturup HTML'ye yerleştiren fonksiyon
-function displayTable(data) {
-    const table = document.createElement('table');
-    const headerRow = document.createElement('tr');
-
-    const headers = ['Company', 'Name', 'Surname', 'Position', 'Work Phone', 'Other Phone', 'Email', 'City', 'Country'];
-    headers.forEach(header => {
-        const th = document.createElement('th');
-        th.textContent = header;
-        headerRow.appendChild(th);
-    });
-    table.appendChild(headerRow);
-
-    data.forEach(row => {
-        const tr = document.createElement('tr');
-        Object.values(row).forEach(cellData => {
-            const td = document.createElement('td');
-            td.textContent = cellData;
-            tr.appendChild(td);
-        });
-        table.appendChild(tr);
-    });
-
-    const outputDiv = document.getElementById('output');
-    outputDiv.innerHTML = '';
-    outputDiv.appendChild(table);
-
-    // DataTables fonksiyonunu çağır
-    $(table).DataTable();
-}
-
-// Excel indirme işlemi
-document.getElementById('exportExcel').addEventListener('click', function() {
-    const table = document.querySelector('table');
-    const wb = XLSX.utils.table_to_book(table, {sheet: "Sheet1"});
-    XLSX.writeFile(wb, 'card_data.xlsx');
-});
-
-// PDF indirme işlemi
-document.getElementById('exportPDF').addEventListener('click', function() {
-    const doc = new jsPDF();
-    doc.autoTable({ html: 'table' });
-    doc.save('card_data.pdf');
-});
-
-async function processAndDisplayData() {
-    const fileInput = document.getElementById('upload');
-    const progressBar = document.getElementById('progressBar');
-    const progressText = document.getElementById('progressText');
-
-    if (fileInput.files.length === 0) {
-        alert("Lütfen bir dosya seçin.");
+// İşlem başlangıcı
+$('#start').on('click', function() {
+    $('#progressBar').css('width', '0%').attr('aria-valuenow', 0).text('0%');
+    $('#progressText').text('İşlem başladı...');
+    
+    const files = $('#upload')[0].files;
+    if (files.length === 0) {
+        alert('Lütfen dosya yükleyin!');
         return;
     }
 
-    progressBar.value = 0;
-    progressText.textContent = "İşlem başlatıldı...";
-
-    const files = fileInput.files;
-    
-    let combinedText = '';
-
-    // Her dosya için OCR işlemi
-    for (let file of files) {
-        await Tesseract.recognize(file, 'eng', {
-            logger: (m) => {
-                if (m.status === 'recognizing text') {
-                    progressBar.value = m.progress * 100;
-                    progressText.textContent = `İşlem %${Math.round(m.progress * 100)} tamamlandı.`;
-                }
-            }
-        }).then(({ data: { text } }) => {
-            combinedText += text + '\n'; // Tüm dosyaların metinlerini birleştir
-        }).catch(err => {
-            progressText.textContent = "Bir hata oluştu: " + err.message;
-        });
-    }
-
-    const extractedData = extractDetails(combinedText);
-    displayTable(extractedData);
-
-    // ChatGPT ile veri işleme
-    useChatGPT(combinedText).then(chatGPTProcessedData => {
-        console.log("ChatGPT Result:", chatGPTProcessedData);
+    Array.from(files).forEach((file, index) => {
+        Tesseract.recognize(file, 'eng')
+            .progress(function(p) {
+                const progress = Math.floor(p.progress * 100);
+                $('#progressBar').css('width', progress + '%').attr('aria-valuenow', progress).text(progress + '%');
+                $('#progressText').text(`İşleniyor: ${file.name}...`);
+            })
+            .then(function(result) {
+                const extractedData = extractDetails(result.data.text);
+                displayTable(extractedData);
+                $('#progressBar').css('width', '100%').attr('aria-valuenow', 100).text('100%');
+                $('#progressText').text('İşlem %100 tamamlandı.');
+            });
     });
-}
+});
 
-document.getElementById('start').onclick = processAndDisplayData;
+// Tabloyu göster
+function displayTable(data) {
+    let tableHtml = `<table id="dataTable" class="table table-striped table-bordered">
+        <thead><tr>
+        <th>Company</th><th>Name</th><th>Surname</th><th>Position</th>
+        <th>Work Phone</th><th>Other Phone</th><th>Email</th><th>City</th><th>Country</th></tr></thead><tbody>`;
+
+    data.forEach(row => {
+        tableHtml += `<tr>
+            <td>${row.Company}</td>
+            <td>${row.Name}</td>
+            <td>${row.Surname}</td>
+            <td>${row.Position}</td>
+            <td>${row["Work Phone"]}</td>
+            <td>${row["Other Phone"]}</td>
+            <td>${row.Email}</td>
+            <td>${row.City}</td>
+            <td>${row.Country}</td></tr>`;
+    });
+
+    tableHtml += `</tbody></table>`;
+    $('#output').html(tableHtml);
+    $('#dataTable').DataTable(); // DataTable ile sıralama ve filtreleme ekle
+}
