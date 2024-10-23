@@ -1,6 +1,6 @@
-// OCR sonuçlarını işleyen fonksiyon
+// Generalized OCR results handler
 function extractDetails(text) {
-    const companyRegex = /(FORLAM-RAIL|HARSCO|AMSTED|KONCAR|MARTINUS|JORS|Schwihag|Kolowag|Holland|Jorsa|Forlam|Harsco Rail)/g;
+    const companyRegex = /(?:[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)?(?:\s(?:Ltd|Co|Inc|LLC|Group|Corp|AG|S.A.|GmbH|PLC|Pty))?)/g;
     const nameRegex = /(Dr\.|Mr\.|Ms\.|Mrs\.)?\s?[A-Z][a-z]+(?:\s[A-Z][a-z]+)?/g;
     const positionRegex = /(Manager|Director|Engineer|Specialist|Business Development|Imports|Marketing)/g;
     const phoneRegex = /(\+?[0-9]{1,4}[\s.-]?[0-9]{1,4}[\s.-]?[0-9]{1,4}[\s.-]?[0-9]{1,4})/g;
@@ -29,21 +29,21 @@ function extractDetails(text) {
     const uniqueCountries = [...new Set(countries)];
 
     const data = namesList.map((nameObj, index) => ({
-        "Company": uniqueCompanies[0] || "Unknown",
+        "Company": uniqueCompanies[index] || "Unknown",
         "Name": nameObj.Name,
         "Surname": nameObj.Surname,
         "Position": positions[index] || "Responsible",
         "Work Phone": phones[index] || "",
         "Other Phone": phones[index + 1] || "",
         "Email": emails[index] || "No Email",
-        "City": uniqueCities[0] || "Unknown",
-        "Country": uniqueCountries[0] || "Unknown"
+        "City": uniqueCities[index] || "Unknown",
+        "Country": uniqueCountries[index] || "Unknown"
     }));
 
     return data;
 }
 
-// İşlem başlangıcı
+// OCR extraction process
 $('#start').on('click', function() {
     $('#progressBar').css('width', '0%').attr('aria-valuenow', 0).text('0%');
     $('#progressText').text('İşlem başladı...');
@@ -70,7 +70,28 @@ $('#start').on('click', function() {
     });
 });
 
-// Tabloyu göster
+// ChatGPT analysis process
+$('#startChatGPT').on('click', function() {
+    $('#progressBar').css('width', '0%').attr('aria-valuenow', 0).text('0%');
+    $('#progressText').text('ChatGPT işlemi başlatıldı...');
+    
+    const files = $('#upload')[0].files;
+    if (files.length === 0) {
+        alert('Lütfen dosya yükleyin!');
+        return;
+    }
+
+    Array.from(files).forEach((file, index) => {
+        Tesseract.recognize(file, 'eng')
+            .then(async function(result) {
+                const extractedData = extractDetails(result.data.text);
+                // Here you could add a call to your ChatGPT API
+                displayChatGPTTable(extractedData); // Display after processing
+            });
+    });
+});
+
+// Table display
 function displayTable(data) {
     let tableHtml = `<table id="dataTable" class="table table-striped table-bordered">
         <thead><tr>
@@ -92,30 +113,10 @@ function displayTable(data) {
 
     tableHtml += `</tbody></table>`;
     $('#output').html(tableHtml);
-    $('#dataTable').DataTable(); // DataTable ile sıralama ve filtreleme ekle
+    $('#dataTable').DataTable();
 }
 
-// ChatGPT ile işlem başlatma
-$('#startChatGPT').on('click', function() {
-    $('#progressBar').css('width', '0%').attr('aria-valuenow', 0).text('0%');
-    $('#progressText').text('ChatGPT işlemi başlatıldı...');
-    
-    const files = $('#upload')[0].files;
-    if (files.length === 0) {
-        alert('Lütfen dosya yükleyin!');
-        return;
-    }
-
-    Array.from(files).forEach((file, index) => {
-        Tesseract.recognize(file, 'eng')
-            .then(async function(result) {
-                const extractedData = extractDetails(result.data.text);
-                displayChatGPTTable(extractedData);
-            });
-    });
-});
-
-// ChatGPT Tablosunu göster
+// ChatGPT table display
 function displayChatGPTTable(data) {
     let tableHtml = `<table id="chatGPTTable" class="table table-striped table-bordered">
         <thead><tr>
