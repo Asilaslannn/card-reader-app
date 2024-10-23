@@ -1,3 +1,4 @@
+// OCR sonuçlarını işleyen fonksiyon
 function extractDetails(text) {
     const companyRegex = /(AL ARFAJ|[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)+ Co|[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)+ Ltd|[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)+ IMPORTS|[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)+ COMMERCIAL)/g; // Şirket adları
     const nameRegex = /(Dr\.|Mr\.|Ms\.|Mrs\.)?\s?[A-Z][a-z]+(?:\s[A-Z][a-z]+)?/g; // İsim ve soyisim
@@ -44,4 +45,44 @@ function extractDetails(text) {
     }));
 
     return data;
+}
+
+// ChatGPT API'yi çağırmak için fonksiyon
+async function fetchChatGPTResponse(text) {
+    const response = await fetch("https://api.openai.com/v1/completions", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer sk-RO0Pr2EW4Acg3SIk3R0CBZ1sfBNwQVPXRtPhwodVCtT3BlbkFJ4ppPQzIIBnO6U6mpEUdmCSmfKXj0ntgAvBtestsjEA` // OpenAI API anahtarınızı buraya ekleyin
+        },
+        body: JSON.stringify({
+            model: "text-davinci-003", // Model seçimi
+            prompt: `Extract information from this text: ${text}`, // Soru veya talep
+            max_tokens: 1000 // Yanıtın maksimum uzunluğu
+        })
+    });
+
+    const data = await response.json();
+    return data.choices[0].text;
+}
+
+// ChatGPT API yanıtını işlemek ve tabloya eklemek için fonksiyon
+async function useChatGPT(text) {
+    const chatGPTResult = await fetchChatGPTResponse(text);
+    console.log("ChatGPT Result:", chatGPTResult);
+    
+    // ChatGPT'den gelen sonuçları işleme
+    // Aldığınız sonucu burada işleyip tabloya aktarabilirsiniz
+}
+
+// Verilerin düzenlenmesi ve tabloya aktarılması
+async function processAndDisplayData(text) {
+    // Önce OCR verilerini işliyoruz
+    const extractedData = extractDetails(text);
+
+    // Daha sonra ChatGPT yanıtını alıp ek veri ekleyebiliriz
+    const chatGPTProcessedData = await useChatGPT(text);
+
+    // Her iki veriyi de tabloya ekleyebiliriz
+    console.log("Final Data", extractedData, chatGPTProcessedData);
 }
