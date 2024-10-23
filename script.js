@@ -47,35 +47,38 @@ function extractDetails(text) {
     return data;
 }
 
-// ChatGPT API'yi çağırmak için fonksiyon
-async function fetchChatGPTResponse(text) {
-    const response = await fetch("https://api.openai.com/v1/completions", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer sk-RO0Pr2EW4Acg3SIk3R0CBZ1sfBNwQVPXRtPhwodVCtT3BlbkFJ4ppPQzIIBnO6U6mpEUdmCSmfKXj0ntgAvBtestsjEA` // OpenAI API anahtarınızı buraya ekleyin
-        },
-        body: JSON.stringify({
-            model: "text-davinci-003", // Model seçimi
-            prompt: `Extract information from this text: ${text}`, // Soru veya talep
-            max_tokens: 1000 // Yanıtın maksimum uzunluğu
-        })
+// Tabloyu oluşturup HTML'ye yerleştiren fonksiyon
+function displayTable(data) {
+    const table = document.createElement('table');
+    const headerRow = document.createElement('tr');
+
+    // Tablonun başlık satırlarını oluştur
+    const headers = ['Company', 'Name', 'Surname', 'Position', 'Work Phone', 'Other Phone', 'Email', 'City', 'Country'];
+    headers.forEach(header => {
+        const th = document.createElement('th');
+        th.textContent = header;
+        headerRow.appendChild(th);
+    });
+    table.appendChild(headerRow);
+
+    // Tablonun veri satırlarını oluştur
+    data.forEach(row => {
+        const tr = document.createElement('tr');
+        Object.values(row).forEach(cellData => {
+            const td = document.createElement('td');
+            td.textContent = cellData;
+            tr.appendChild(td);
+        });
+        table.appendChild(tr);
     });
 
-    const data = await response.json();
-    return data.choices[0].text;
+    // Oluşturulan tabloyu HTML'deki "output" div'ine ekle
+    const outputDiv = document.getElementById('output');
+    outputDiv.innerHTML = ''; // Önceki içeriği temizle
+    outputDiv.appendChild(table);
 }
 
-// ChatGPT API yanıtını işlemek ve tabloya eklemek için fonksiyon
-async function useChatGPT(text) {
-    const chatGPTResult = await fetchChatGPTResponse(text);
-    console.log("ChatGPT Result:", chatGPTResult);
-    
-    // ChatGPT'den gelen sonuçları işleme
-    // Aldığınız sonucu burada işleyip tabloya aktarabilirsiniz
-}
-
-// Verilerin düzenlenmesi ve tabloya aktarılması
+// Başlat butonuna tıklanınca işlemi başlatan fonksiyon
 async function processAndDisplayData() {
     const fileInput = document.getElementById('upload');
     const progressBar = document.getElementById('progressBar');
@@ -100,9 +103,9 @@ async function processAndDisplayData() {
         }
     }).then(({ data: { text } }) => {
         const extractedData = extractDetails(text);
-        // Sonucu ekranda göster
-        const outputDiv = document.getElementById('output');
-        outputDiv.textContent = JSON.stringify(extractedData, null, 2);
+        
+        // Tabloyu göster
+        displayTable(extractedData);
 
         // ChatGPT ile veri işleme
         useChatGPT(text).then(chatGPTProcessedData => {
