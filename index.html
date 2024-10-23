@@ -3,99 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Veri İşleme ve Tablo Oluşturma</title>
+    <title>ChatGPT Entegrasyonu</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
         }
         h1 {
             text-align: center;
+            color: #333;
         }
-        .upload-area {
-            margin-bottom: 20px;
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        table {
+        textarea {
             width: 100%;
-            border-collapse: collapse;
+            height: 100px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
         }
-        table, th, td {
-            border: 1px solid black;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        .progress-container {
+        button {
             width: 100%;
-            background-color: #f2f2f2;
-            margin-bottom: 20px;
-        }
-        .progress-bar {
-            width: 0%;
-            height: 30px;
+            padding: 10px;
             background-color: #4caf50;
-            text-align: center;
-            line-height: 30px;
             color: white;
-        }
-        .download-buttons {
-            margin-top: 20px;
-        }
-        .filterable th {
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
             cursor: pointer;
         }
-        .status-text {
-            text-align: center;
-            margin-bottom: 10px;
+        button:hover {
+            background-color: #45a049;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
 
-    <h1>Dosya Yükleme ve Tablo Oluşturma</h1>
-
-    <div class="upload-area">
-        <label for="file-upload">Dosyaları Yükleyin (PDF veya JPG):</label>
-        <input type="file" id="file-upload" multiple accept=".pdf, .jpg, .jpeg, .png">
-    </div>
-
-    <div class="status-text" id="status-text">Henüz bir işlem yapılmadı.</div>
-
-    <div class="progress-container">
-        <div class="progress-bar" id="progress-bar">0%</div>
-    </div>
-
-    <button id="start-process" disabled>Başlat</button>
-
-    <h2>İşlenen Veriler:</h2>
-    <table id="data-table" class="filterable">
-        <thead>
-            <tr>
-                <th>Şirketin Adı</th>
-                <th>Kişinin Adı</th>
-                <th>Kişinin Soyadı</th>
-                <th>Kişinin Pozisyonu</th>
-                <th>Kişinin Numarası</th>
-                <th>Şirketin Numarası</th>
-                <th>Kişinin Mail Adresi</th>
-                <th>Şirketin Mail Adresi</th>
-                <th>Şehir</th>
-                <th>Ülke</th>
-                <th>Website</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Tarama sonrası veriler buraya gelecek -->
-        </tbody>
-    </table>
-
-    <div class="download-buttons">
-        <button id="download-excel">Excel Olarak İndir</button>
-        <button id="download-pdf">PDF Olarak İndir</button>
+    <h1>ChatGPT ile Etkileşime Geçin</h1>
+    <div class="container">
+        <textarea id="user-input" placeholder="Bir soru sorun..."></textarea>
+        <button id="submit-btn">Gönder</button>
+        <div class="response" id="response-output"></div>
     </div>
 
     <script src="script.js"></script>
