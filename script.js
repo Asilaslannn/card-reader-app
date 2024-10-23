@@ -1,17 +1,21 @@
 function extractDetails(text) {
-    // Şirket adlarını ve kişileri çıkar
-    const companyRegex = /[A-Z][a-z]+\s[A-Z][a-z]+/g; // Şirket ve kişi adları için basit regex
+    // Şirket adlarını, e-postaları ve telefon numaralarını çıkarmak için regex kullan
+    const companyRegex = /([A-Z][a-zA-Z]+(\s[A-Z][a-zA-Z]+)+)/g; // Şirket ve isimler için
     const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-    const phoneRegex = /\+?[0-9\s\-]+/g;
+    const phoneRegex = /(\+?[0-9\-\s().]+)/g; // Telefon numaralarını tanıyan regex
 
-    const companies = text.match(companyRegex);
-    const emails = text.match(emailRegex);
-    const phones = text.match(phoneRegex);
+    // Şirket adları, e-posta adresleri ve telefon numaralarını yakala
+    const companies = text.match(companyRegex) || [];
+    const emails = text.match(emailRegex) || [];
+    const phones = text.match(phoneRegex) || [];
+
+    // Boş ve geçersiz telefon numaralarını filtrele
+    const validPhones = phones.filter(phone => phone.trim().length > 4); // Örneğin, 4 karakterden kısa numaraları filtrele
 
     return {
-        companies: companies || [],
-        emails: emails || [],
-        phones: phones || []
+        companies: companies,
+        emails: emails,
+        phones: validPhones
     };
 }
 
@@ -27,7 +31,7 @@ document.getElementById('upload').onchange = function(event) {
         ).then(({ data: { text } }) => {
             const extractedData = extractDetails(text);
             console.log("Extracted Data:", extractedData);
-            document.getElementById('output').innerText = JSON.stringify(extractedData, null, 2); // Veriyi JSON olarak göster
+            document.getElementById('output').innerText = JSON.stringify(extractedData, null, 2); // Veriyi JSON formatında göster
         });
     }
 };
