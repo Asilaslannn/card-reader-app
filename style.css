@@ -1,61 +1,57 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 20px;
-    background-color: #f4f4f4;
+    background-color: #e8f0fe;
 }
 
 h1 {
-    color: #333;
+    color: #2d3436;
+    font-size: 36px;
     text-align: center;
+    font-weight: bold;
 }
 
 p {
-    color: #555;
+    color: #636e72;
     text-align: center;
 }
 
 input[type="file"] {
-    display: block;
     margin: 20px auto;
 }
 
 button {
-    display: block;
-    margin: 20px auto;
-    padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
+    padding: 12px 24px;
+    background-color: #55efc4;
+    color: #fff;
     border: none;
     cursor: pointer;
+    font-size: 18px;
 }
 
 button:hover {
-    background-color: #45a049;
+    background-color: #00cec9;
 }
 
 #progressBar {
-    display: block;
-    margin: 20px auto;
-    height: 25px;
+    height: 30px;
 }
 
 #progressText {
     text-align: center;
-    color: #333;
+    color: #2d3436;
     font-weight: bold;
 }
 
-#output {
+#output, #chatgpt-output {
     margin: 20px auto;
     padding: 20px;
-    background-color: white;
-    border: 1px solid #ccc;
-    width: 80%;
-    white-space: pre-wrap;
-    font-family: monospace;
-    font-size: 14px;
-    color: #333;
+    background-color: #fff;
+    border-radius: 8px;
+    border: 1px solid #dfe6e9;
+    width: 90%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 table {
@@ -65,13 +61,14 @@ table {
 }
 
 table, th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
+    border: 1px solid #dfe6e9;
+    padding: 12px;
 }
 
 th {
-    background-color: #f2f2f2;
-    text-align: center;
+    background-color: #55efc4;
+    color: white;
+    font-weight: bold;
 }
 
 td {
