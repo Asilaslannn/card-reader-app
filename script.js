@@ -1,6 +1,6 @@
 function extractDetails(text) {
     const companyRegex = /(AL ARFAJ|[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)+ Co|[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)+ Ltd)/g; // Şirket adları
-    const nameRegex = /(Dr\.|Mr\.|Ms\.)?\s?[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)?/g; // İsim ve soyisim
+    const nameRegex = /(Dr\.|Mr\.|Ms\.|Mrs\.)?\s?[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)?/g; // İsim ve soyisim
     const positionRegex = /(Manager|Director|Engineer|Specialist|Business Development)/g; // Pozisyon
     const phoneRegex = /(\+?[0-9\-\s().]+)/g; // Telefon numarası
     const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g; // E-posta adresi
@@ -20,8 +20,8 @@ function extractDetails(text) {
     const namesList = names.map(name => {
         const nameParts = name.split(" ");
         return {
-            "Name": nameParts[0] || "Responsible",
-            "Surname": nameParts[1] || "."
+            "Name": nameParts[0] || "Responsible", // İlk isim unvan veya ad olabilir
+            "Surname": nameParts[1] || "." // İkinci isim soyad olabilir
         };
     });
 
