@@ -13,10 +13,13 @@
     <p>Upload your files here.</p>
 
     <!-- Dosya yükleme alanı -->
-    <input type="file" id="upload" accept="image/*,application/pdf">
-
-    <!-- OCR ile çıkan metni göstermek için -->
-    <pre id="output"></pre>
+    <input type="file" id="upload" accept="image/*" multiple>
+    <button id="start">Başlat</button>
+    <progress id="progressBar" value="0" max="100" style="width: 100%;"></progress>
+    <p id="progressText">İşlem bekleniyor...</p>
+    
+    <!-- Çıktı verisini göstermek için alan -->
+    <div id="output"></div>
 
     <script src="script.js"></script>
 </body>
