@@ -37,18 +37,6 @@ function extractDetails(text) {
     return data;
 }
 
-// Görsel önizleme işlevi
-$('#toggleImage').on('click', function() {
-    const imgDiv = $('#imagePreview');
-    if (imgDiv.is(":visible")) {
-        imgDiv.hide();
-        $(this).text('Görseli Göster');
-    } else {
-        imgDiv.show();
-        $(this).text('Görseli Gizle');
-    }
-});
-
 // Dosya yükleme işlemleri
 $('#upload').on('change', function(event) {
     const file = event.target.files[0];
@@ -76,7 +64,7 @@ $('#start').on('click', function () {
             logger: (m) => {
                 const progress = Math.floor(m.progress * 100);
                 $('#progressBar').css('width', progress + '%').attr('aria-valuenow', progress).text(progress + '%');
-                $('#progressText').text(`İşleniyor: ${file.name}...`);
+                $('#progressText').text(`İşleniyor: ${file.name}... (${progress}%)`); // İşlem ilerleyişini göster
             },
         }).then(function (result) {
             const extractedData = extractDetails(result.data.text);
@@ -90,6 +78,7 @@ $('#start').on('click', function () {
     });
 });
 
+// ChatGPT işlemini başlat
 $('#startChatGPT').on('click', function () {
     $('#progressBar').css('width', '0%').attr('aria-valuenow', 0).text('0%');
     $('#progressText').text('ChatGPT işlemi başlatıldı...');
@@ -112,50 +101,6 @@ $('#startChatGPT').on('click', function () {
         });
     });
 });
-
-// ChatGPT API çağrısı
-async function fetchChatGPTResponse(text) {
-    try {
-        const response = await fetch("https://api.openai.com/v1/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer YOUR_API_KEY` // API anahtarınızı kontrol edin
-            },
-            body: JSON.stringify({
-                model: "text-davinci-003",
-                prompt: `Extract information from this text: ${text}`,
-                max_tokens: 1000,
-            }),
-        });
-
-        const data = await response.json();
-        return data.choices[0].text;
-    } catch (error) {
-        console.error('ChatGPT API çağrısı hatası:', error);
-        throw error;
-    }
-}
-
-// Veriyi Excel olarak dışa aktarma
-function exportToExcel(data) {
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
-    XLSX.writeFile(workbook, "OCR_Data.xlsx");
-}
-
-// Veriyi PDF olarak dışa aktarma
-function exportToPDF(data) {
-    const doc = new jsPDF();
-    doc.text(20, 20, 'OCR Data');
-    let row = 30;
-    data.forEach((item) => {
-        doc.text(20, row, JSON.stringify(item));
-        row += 10;
-    });
-    doc.save("OCR_Data.pdf");
-}
 
 // Tabloyu gösterme
 function displayTable(data) {
