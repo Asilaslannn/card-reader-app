@@ -1,14 +1,13 @@
 // OCR sonuçlarını işleyen fonksiyon
 function extractDetails(text) {
-    const companyRegex = /(FORLAM-RAIL|HARSCO|AMSTED|KONCAR|MARTINUS|JORS|Schwihag|Kolowag|Holland|Jorsa|Forlam|Harsco Rail)/g;
+    const companyRegex = /(FORLAM-RAIL|HARSCO|AMSTED|KONCAR|MARTINUS|JORS|Schwihag|Kolowag|Holland|Lantech|Matisa|Bonatrans|Duagon)/g;
     const nameRegex = /(Dr\.|Mr\.|Ms\.|Mrs\.)?\s?[A-Z][a-z]+(?:\s[A-Z][a-z]+)?/g;
-    const positionRegex = /(Manager|Director|Engineer|Specialist|Business Development|Imports|Marketing)/g;
+    const positionRegex = /(Manager|Director|Engineer|Specialist|Marketing|Sales|Development|Consultant)/g;
     const phoneRegex = /(\+?[0-9]{1,4}[\s.-]?[0-9]{1,4}[\s.-]?[0-9]{1,4}[\s.-]?[0-9]{1,4})/g;
     const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-    const cityRegex = /(Jeddah|Dubai|Riyadh|Abu Dhabi|Zagreb|Düsseldorf)/g;
-    const countryRegex = /(Saudi Arabia|UAE|United Arab Emirates|Germany|France|Australia)/g;
+    const cityRegex = /(Jeddah|Dubai|Riyadh|Zagreb|Düsseldorf|Crissier|Nürnberg|Munich)/g;
+    const countryRegex = /(Saudi Arabia|UAE|Germany|France|Australia|Switzerland|Czech Republic)/g;
 
-    // Verileri yakala
     const companies = text.match(companyRegex) || ["Unknown Company"];
     const names = text.match(nameRegex) || ["Responsible"];
     const positions = text.match(positionRegex) || ["Responsible"];
@@ -17,7 +16,6 @@ function extractDetails(text) {
     const cities = text.match(cityRegex) || ["Unknown City"];
     const countries = text.match(countryRegex) || ["Unknown Country"];
 
-    // İsim ve soyisim ayrımı
     const namesList = names.map(name => {
         const nameParts = name.split(" ");
         return {
@@ -26,28 +24,22 @@ function extractDetails(text) {
         };
     });
 
-    // Tekrarlayan verileri temizle
-    const uniqueCompanies = [...new Set(companies)];
-    const uniqueCities = [...new Set(cities)];
-    const uniqueCountries = [...new Set(countries)];
-
-    // Tablo için düzenlenmiş veri formatı
     const data = namesList.map((nameObj, index) => ({
-        "Company": uniqueCompanies[0] || "Unknown",
+        "Company": companies[index] || "Unknown Company",
         "Name": nameObj.Name,
         "Surname": nameObj.Surname,
         "Position": positions[index] || "Responsible",
         "Work Phone": phones[index] || "",
         "Other Phone": phones[index + 1] || "",
         "Email": emails[index] || "No Email",
-        "City": uniqueCities[0] || "Unknown",
-        "Country": uniqueCountries[0] || "Unknown"
+        "City": cities[index] || "Unknown City",
+        "Country": countries[index] || "Unknown Country"
     }));
 
     return data;
 }
 
-// İşlem başlangıcı
+// Tesseract işlemi
 $('#start').on('click', function() {
     $('#progressBar').css('width', '0%').attr('aria-valuenow', 0).text('0%');
     $('#progressText').text('İşlem başladı...');
@@ -96,5 +88,31 @@ function displayTable(data) {
 
     tableHtml += `</tbody></table>`;
     $('#output').html(tableHtml);
-    $('#dataTable').DataTable(); // DataTable ile sıralama ve filtreleme ekle
+    $('#dataTable').DataTable();
+}
+
+// ChatGPT API Entegrasyonu için fonksiyon
+async function fetchChatGPTResponse(text) {
+    const response = await fetch("https://api.openai.com/v1/completions", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer YOUR_API_KEY`
+        },
+        body: JSON.stringify({
+            model: "text-davinci-003",
+            prompt: `Extract information from this text: ${text}`,
+            max_tokens: 1000
+        })
+    });
+
+    const data = await response.json();
+    return data.choices[0].text;
+}
+
+// ChatGPT Yanıtını Tabloya Eklemek
+async function useChatGPT(text) {
+    const chatGPTResult = await fetchChatGPTResponse(text);
+    console.log("ChatGPT Result:", chatGPTResult);
+    // ChatGPT'nin sonuçlarını işleyip tabloya ekleyin
 }
