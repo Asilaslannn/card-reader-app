@@ -1,4 +1,4 @@
-// Generalized OCR results handler
+// OCR sonuçlarını işle
 function extractDetails(text) {
     const companyRegex = /(?:[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)?(?:\s(?:Ltd|Co|Inc|LLC|Group|Corp|AG|S.A.|GmbH|PLC|Pty))?)/g;
     const nameRegex = /(Dr\.|Mr\.|Ms\.|Mrs\.)?\s?[A-Z][a-z]+(?:\s[A-Z][a-z]+)?/g;
@@ -37,156 +37,28 @@ function extractDetails(text) {
     return data;
 }
 
-// OCR extraction process
-$('#start').on('click', function() {
-    $('#progressBar').css('width', '0%').attr('aria-valuenow', 0).text('0%');
-    $('#progressText').text('İşlem başladı...');
-    
-    const files = $('#upload')[0].files;
-    if (files.length === 0) {
-        alert('Lütfen dosya yükleyin!');
-        return;
-    }
-
-    Array.from(files).forEach((file, index) => {
-        Tesseract.recognize(file, 'eng')
-            .progress(function(p) {
-                const progress = Math.floor(p.progress * 100);
-                $('#progressBar').css('width', progress + '%').attr('aria-valuenow', progress).text(progress + '%');
-                $('#progressText').text(`İşleniyor: ${file.name}...`);
-            })
-            .then(function(result) {
-                const extractedData = extractDetails(result.data.text);
-                displayTable(extractedData);
-                $('#progressBar').css('width', '100%').attr('aria-valuenow', 100).text('100%');
-                $('#progressText').text('İşlem %100 tamamlandı.');
-            });
-    });
-});
-
-// ChatGPT analysis process
-$('#startChatGPT').on('click', function() {
-    $('#progressBar').css('width', '0%').attr('aria-valuenow', 0).text('0%');
-    $('#progressText').text('ChatGPT işlemi başlatıldı...');
-    
-    const files = $('#upload')[0].files;
-    if (files.length === 0) {
-        alert('Lütfen dosya yükleyin!');
-        return;
-    }
-
-    Array.from(files).forEach((file, index) => {
-        Tesseract.recognize(file, 'eng')
-            .then(async function(result) {
-                const extractedData = extractDetails(result.data.text);
-                const chatGPTProcessedData = await useChatGPT(result.data.text); 
-                displayChatGPTTable(chatGPTProcessedData); 
-            });
-    });
-});
-
-// Function to call ChatGPT API
-async function fetchChatGPTResponse(text) {
-    const response = await fetch("https://api.openai.com/v1/completions", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer YOUR_API_KEY` 
-        },
-        body: JSON.stringify({
-            model: "text-davinci-003", 
-            prompt: `Extract information from this text: ${text}`, 
-            max_tokens: 1000 
-        })
-    });
-
-    const data = await response.json();
-    return data.choices[0].text;
-}
-
-// Use ChatGPT for further analysis
-async function useChatGPT(text) {
-    const chatGPTResult = await fetchChatGPTResponse(text);
-    const parsedResult = JSON.parse(chatGPTResult); 
-    return parsedResult;
-}
-
-// Function to display OCR-extracted data in a table
-function displayTable(data) {
-    let tableHtml = `<table id="dataTable" class="table table-striped table-bordered">
-        <thead><tr>
-        <th>Company</th><th>Name</th><th>Surname</th><th>Position</th>
-        <th>Work Phone</th><th>Other Phone</th><th>Email</th><th>City</th><th>Country</th></tr></thead><tbody>`;
-
-    data.forEach(row => {
-        tableHtml += `<tr>
-            <td>${row.Company}</td>
-            <td>${row.Name}</td>
-            <td>${row.Surname}</td>
-            <td>${row.Position}</td>
-            <td>${row["Work Phone"]}</td>
-            <td>${row["Other Phone"]}</td>
-            <td>${row.Email}</td>
-            <td>${row.City}</td>
-            <td>${row.Country}</td></tr>`;
-    });
-
-    tableHtml += `</tbody></table>`;
-    $('#output').html(tableHtml);
-    $('#dataTable').DataTable();
-}
-
-// Function to display ChatGPT-processed data in a table
-function displayChatGPTTable(data) {
-    let tableHtml = `<table id="chatGPTTable" class="table table-striped table-bordered">
-        <thead><tr>
-        <th>Company</th><th>Name</th><th>Surname</th><th>Position</th>
-        <th>Work Phone</th><th>Other Phone</th><th>Email</th><th>City</th><th>Country</th></tr></thead><tbody>`;
-
-    data.forEach(row => {
-        tableHtml += `<tr>
-            <td>${row.Company}</td>
-            <td>${row.Name}</td>
-            <td>${row.Surname}</td>
-            <td>${row.Position}</td>
-            <td>${row["Work Phone"]}</td>
-            <td>${row["Other Phone"]}</td>
-            <td>${row.Email}</td>
-            <td>${row.City}</td>
-            <td>${row.Country}</td></tr>`;
-    });
-
-    tableHtml += `</tbody></table>`;
-    $('#chatgpt-output').html(tableHtml);
-    $('#chatGPTTable').DataTable();
-}
-
-// Export data to Excel
-function exportToExcel(data) {
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
-    XLSX.writeFile(workbook, "OCR_Data.xlsx");
-}
-
-// Export data to PDF
-function exportToPDF(data) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.autoTable({
-        head: [['Company', 'Name', 'Surname', 'Position', 'Work Phone', 'Other Phone', 'Email', 'City', 'Country']],
-        body: data.map(row => [row.Company, row.Name, row.Surname, row.Position, row['Work Phone'], row['Other Phone'], row.Email, row.City, row.Country]),
-    });
-    doc.save("OCR_Data.pdf");
-}
-
-// Show/Hide uploaded image
+// Görsel önizleme işlevi
 $('#toggleImage').on('click', function() {
-    const img = $('#uploadedImage');
-    if (img.css('display') === 'none') {
-        img.attr('src', URL.createObjectURL($('#upload')[0].files[0]));
-        img.show();
+    const imgDiv = $('#imagePreview');
+    if (imgDiv.is(":visible")) {
+        imgDiv.hide();
+        $(this).text('Görseli Göster');
     } else {
-        img.hide();
+        imgDiv.show();
+        $(this).text('Görseli Gizle');
     }
 });
+
+// Dosya yükleme işlemleri
+$('#upload').on('change', function(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            $('#uploadedImage').attr('src', e.target.result);
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// PDF ve Excel için dışa aktarma fonksiyonları buraya eklenecek...
