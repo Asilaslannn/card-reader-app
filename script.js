@@ -79,8 +79,8 @@ $('#startChatGPT').on('click', function() {
         Tesseract.recognize(file, 'eng')
             .then(async function(result) {
                 const extractedData = extractDetails(result.data.text);
-                const chatGPTProcessedData = await useChatGPT(result.data.text); // Process with ChatGPT
-                displayChatGPTTable(chatGPTProcessedData); // Display ChatGPT-processed data
+                const chatGPTProcessedData = await useChatGPT(result.data.text); 
+                displayChatGPTTable(chatGPTProcessedData); 
             });
     });
 });
@@ -91,7 +91,7 @@ async function fetchChatGPTResponse(text) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer YOUR_API_KEY` // Replace with your OpenAI API key
+            "Authorization": `Bearer YOUR_API_KEY` 
         },
         body: JSON.stringify({
             model: "text-davinci-003", 
@@ -107,8 +107,6 @@ async function fetchChatGPTResponse(text) {
 // Use ChatGPT for further analysis
 async function useChatGPT(text) {
     const chatGPTResult = await fetchChatGPTResponse(text);
-    console.log("ChatGPT Result:", chatGPTResult);
-    // Assuming the API returns JSON-like data
     const parsedResult = JSON.parse(chatGPTResult); 
     return parsedResult;
 }
@@ -163,10 +161,32 @@ function displayChatGPTTable(data) {
     $('#chatGPTTable').DataTable();
 }
 
-// Function to export data to Excel
+// Export data to Excel
 function exportToExcel(data) {
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
     XLSX.writeFile(workbook, "OCR_Data.xlsx");
 }
+
+// Export data to PDF
+function exportToPDF(data) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.autoTable({
+        head: [['Company', 'Name', 'Surname', 'Position', 'Work Phone', 'Other Phone', 'Email', 'City', 'Country']],
+        body: data.map(row => [row.Company, row.Name, row.Surname, row.Position, row['Work Phone'], row['Other Phone'], row.Email, row.City, row.Country]),
+    });
+    doc.save("OCR_Data.pdf");
+}
+
+// Show/Hide uploaded image
+$('#toggleImage').on('click', function() {
+    const img = $('#uploadedImage');
+    if (img.css('display') === 'none') {
+        img.attr('src', URL.createObjectURL($('#upload')[0].files[0]));
+        img.show();
+    } else {
+        img.hide();
+    }
+});
