@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const dataTable = document.getElementById('data-table').getElementsByTagName('tbody')[0];
     let uploadedFiles = [];
 
-    // OpenAI API anahtarı (bu güvenli bir sunucuda saklanmalı)
-    const apiKey = "sk-RO0Pr2EW4Acg3SIk3R0CBZ1sfBNwQVPXRtPhwodVCtT3BlbkFJ4ppPQzIIBnO6U6mpEUdmCSmfKXj0ntgAvBtestsjEA";  // API anahtarını buraya ekleyin
+    // OpenAI API anahtarı (güvenli bir sunucuda saklanmalı)
+    const apiKey = "sk-RO0Pr2EW4Acg3SIk3R0CBZ1sfBNwQVPXRtPhwodVCtT3BlbkFJ4ppPQzIIBnO6U6mpEUdmCSmfKXj0ntgAvBtestsjEA";  // Doğru OpenAI API anahtarını buraya ekle
 
     // Dosya yüklendiğinde "Başlat" butonunu aktif et
     fileInput.addEventListener('change', function (event) {
@@ -20,6 +20,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // "Başlat" butonuna basıldığında işlemi başlat
     startProcessButton.addEventListener('click', function () {
+        if (uploadedFiles.length === 0) {
+            alert("Lütfen dosya yükleyin!");
+            return;
+        }
+
         progressBar.style.width = '0%';
         progressBar.innerText = '0%';
         let totalFiles = uploadedFiles.length;
@@ -31,6 +36,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 addToTable(data);
                 processedFiles++;
                 updateProgressBar(processedFiles, totalFiles);
+            }).catch(error => {
+                console.error("Hata oluştu:", error);
+                alert("Dosya işlenirken bir hata meydana geldi. Lütfen tekrar deneyin.");
             });
         });
     });
@@ -66,10 +74,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     const result = await response.json();
                     const extractedData = extractDataFromResponse(result.choices[0].text);
-
                     resolve(extractedData);
                 } catch (error) {
-                    console.error("Dosya işlenirken hata oluştu:", error);
+                    console.error("API ile bağlantı sırasında hata:", error);
                     reject(error);
                 }
             };
