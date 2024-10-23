@@ -48,6 +48,10 @@
         .filterable th {
             cursor: pointer;
         }
+        .status-text {
+            text-align: center;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -59,9 +63,13 @@
         <input type="file" id="file-upload" multiple accept=".pdf, .jpg, .jpeg, .png">
     </div>
 
+    <div class="status-text" id="status-text">Henüz bir işlem yapılmadı.</div>
+
     <div class="progress-container">
         <div class="progress-bar" id="progress-bar">0%</div>
     </div>
+
+    <button id="start-process" disabled>Başlat</button>
 
     <h2>İşlenen Veriler:</h2>
     <table id="data-table" class="filterable">
@@ -90,71 +98,7 @@
         <button id="download-pdf">PDF Olarak İndir</button>
     </div>
 
-    <script>
-        const fileInput = document.getElementById('file-upload');
-        const progressBar = document.getElementById('progress-bar');
-        
-        // Dosya yüklendiğinde ilerleme çubuğunu göster
-        fileInput.addEventListener('change', function(event) {
-            const files = event.target.files;
-            const totalFiles = files.length;
-            let uploadedFiles = 0;
-
-            const interval = setInterval(() => {
-                uploadedFiles++;
-                const progress = (uploadedFiles / totalFiles) * 100;
-                progressBar.style.width = progress + '%';
-                progressBar.innerText = Math.floor(progress) + '%';
-                if (progress >= 100) {
-                    clearInterval(interval);
-                }
-            }, 500); // Test amacıyla her 500ms'de ilerliyor
-
-            // Burada dosya işlemleri yapılacak (API entegrasyonu ile tarama vs.)
-        });
-
-        // Filtre ve sıralama fonksiyonu (basit)
-        document.querySelectorAll('.filterable th').forEach(headerCell => {
-            headerCell.addEventListener('click', () => {
-                const tableElement = headerCell.parentElement.parentElement.parentElement;
-                const headerIndex = Array.prototype.indexOf.call(headerCell.parentElement.children, headerCell);
-                const currentIsAscending = headerCell.classList.contains('th-sort-asc');
-
-                sortTableByColumn(tableElement, headerIndex, !currentIsAscending);
-            });
-        });
-
-        function sortTableByColumn(table, column, asc = true) {
-            const dirModifier = asc ? 1 : -1;
-            const rows = Array.from(table.querySelectorAll('tbody tr'));
-
-            const sortedRows = rows.sort((a, b) => {
-                const aColText = a.querySelector(`td:nth-child(${column + 1})`).textContent.trim();
-                const bColText = b.querySelector(`td:nth-child(${column + 1})`).textContent.trim();
-
-                return aColText > bColText ? (1 * dirModifier) : (-1 * dirModifier);
-            });
-
-            while (table.querySelector('tbody').firstChild) {
-                table.querySelector('tbody').removeChild(table.querySelector('tbody').firstChild);
-            }
-
-            table.querySelector('tbody').append(...sortedRows);
-
-            table.querySelectorAll('th').forEach(th => th.classList.remove('th-sort-asc', 'th-sort-desc'));
-            headerCell.classList.toggle('th-sort-asc', asc);
-            headerCell.classList.toggle('th-sort-desc', !asc);
-        }
-        
-        // Excel ve PDF indirme butonları (işlevsellik daha sonra eklenecek)
-        document.getElementById('download-excel').addEventListener('click', function() {
-            alert('Excel olarak indirilecek');
-        });
-
-        document.getElementById('download-pdf').addEventListener('click', function() {
-            alert('PDF olarak indirilecek');
-        });
-    </script>
+    <script src="script.js"></script>
 
 </body>
 </html>
