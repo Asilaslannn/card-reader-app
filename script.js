@@ -76,13 +76,42 @@ async function useChatGPT(text) {
 }
 
 // Verilerin düzenlenmesi ve tabloya aktarılması
-async function processAndDisplayData(text) {
-    // Önce OCR verilerini işliyoruz
-    const extractedData = extractDetails(text);
+async function processAndDisplayData() {
+    const fileInput = document.getElementById('upload');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
 
-    // Daha sonra ChatGPT yanıtını alıp ek veri ekleyebiliriz
-    const chatGPTProcessedData = await useChatGPT(text);
+    if (fileInput.files.length === 0) {
+        alert("Lütfen bir dosya seçin.");
+        return;
+    }
 
-    // Her iki veriyi de tabloya ekleyebiliriz
-    console.log("Final Data", extractedData, chatGPTProcessedData);
+    progressBar.value = 0;
+    progressText.textContent = "İşlem başlatıldı...";
+
+    const file = fileInput.files[0];
+    
+    Tesseract.recognize(file, 'eng', {
+        logger: (m) => {
+            if (m.status === 'recognizing text') {
+                progressBar.value = m.progress * 100;
+                progressText.textContent = `İşlem %${Math.round(m.progress * 100)} tamamlandı.`;
+            }
+        }
+    }).then(({ data: { text } }) => {
+        const extractedData = extractDetails(text);
+        // Sonucu ekranda göster
+        const outputDiv = document.getElementById('output');
+        outputDiv.textContent = JSON.stringify(extractedData, null, 2);
+
+        // ChatGPT ile veri işleme
+        useChatGPT(text).then(chatGPTProcessedData => {
+            console.log("ChatGPT Result:", chatGPTProcessedData);
+        });
+    }).catch(err => {
+        progressText.textContent = "Bir hata oluştu: " + err.message;
+    });
 }
+
+// Başlat butonuna tıklanınca işlemi başlat
+document.getElementById('start').onclick = processAndDisplayData;
