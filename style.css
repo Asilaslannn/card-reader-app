@@ -1,3 +1,4 @@
+/* Genel sayfa stili */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
@@ -10,40 +11,84 @@ h1 {
     font-size: 36px;
     text-align: center;
     font-weight: bold;
+    margin-bottom: 20px;
 }
 
 p {
     color: #2d3436;
     text-align: center;
+    font-size: 18px;
+    margin-bottom: 20px;
 }
 
+/* Dosya seçme input alanı */
 input[type="file"] {
     margin: 20px auto;
+    display: block;
+    padding: 10px;
+    background-color: #ecf0f1;
+    border: 2px solid #dfe6e9;
+    border-radius: 8px;
+    max-width: 400px;
+    font-size: 16px;
 }
 
+input[type="file"]:hover, 
+input[type="file"]:focus {
+    background-color: #dfe6e9;
+    outline: none;
+    border-color: #2ecc71;
+}
+
+/* Buton stili */
 button {
     padding: 12px 24px;
     background-color: #2ecc71;
     color: #fff;
     border: none;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 18px;
+    margin: 10px;
+    transition: background-color 0.3s ease;
 }
 
 button:hover {
     background-color: #27ae60;
 }
 
+button:focus {
+    outline: 3px solid #27ae60;
+    background-color: #1e8449;
+}
+
+/* İlerleme barı */
 #progressBar {
     height: 30px;
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+    background-color: #ecf0f1;
+    border-radius: 15px;
+    overflow: hidden;
+    border: 1px solid #dfe6e9;
+}
+
+#progressBar div {
+    height: 100%;
+    background-color: #2ecc71;
+    width: 0%;
+    transition: width 0.4s ease;
 }
 
 #progressText {
     text-align: center;
     color: #34495e;
     font-weight: bold;
+    margin-top: 10px;
 }
 
+/* Çıktı bölümleri */
 #output, #chatgpt-output {
     margin: 20px auto;
     padding: 20px;
@@ -52,8 +97,11 @@ button:hover {
     border: 1px solid #dfe6e9;
     width: 90%;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 1200px;
+    overflow-x: auto;
 }
 
+/* Tablo stili */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -63,14 +111,51 @@ table {
 table, th, td {
     border: 1px solid #dfe6e9;
     padding: 12px;
+    text-align: center;
 }
 
 th {
     background-color: #2ecc71;
     color: white;
     font-weight: bold;
+    text-transform: uppercase;
 }
 
 td {
+    background-color: #ecf0f1;
+}
+
+/* Alternatif satır renkleri */
+table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Hover efekti */
+table tr:hover {
+    background-color: #dfe6e9;
+}
+
+/* Hata mesajları için stil */
+#errorMessage {
+    color: #e74c3c;
+    font-weight: bold;
     text-align: center;
+    margin: 20px auto;
+}
+
+/* Responsive için medya sorgusu */
+@media (max-width: 768px) {
+    button {
+        font-size: 16px;
+        padding: 10px 20px;
+    }
+
+    table, th, td {
+        padding: 8px;
+        font-size: 14px;
+    }
+    
+    input[type="file"] {
+        max-width: 90%;
+    }
 }
