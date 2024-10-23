@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let uploadedFiles = [];
 
     // OpenAI API anahtarı (güvenli bir sunucuda saklanmalı)
-    const apiKey = "sk-RO0Pr2EW4Acg3SIk3R0CBZ1sfBNwQVPXRtPhwodVCtT3BlbkFJ4ppPQzIIBnO6U6mpEUdmCSmfKXj0ntgAvBtestsjEA";  // Doğru OpenAI API anahtarını buraya ekle
+    const apiKey = "sk-RO0Pr2EW4Acg3SIk3R0CBZ1sfBNwQVPXRtPhwodVCtT3BlbkFJ4ppPQzIIBnO6U6mpEUdmCSmfKXj0ntgAvBtestsjEA";
 
     // Dosya yüklendiğinde "Başlat" butonunu aktif et
     fileInput.addEventListener('change', function (event) {
@@ -72,7 +72,15 @@ document.addEventListener('DOMContentLoaded', function () {
                         })
                     });
 
+                    if (!response.ok) {
+                        throw new Error(`API isteği başarısız: ${response.statusText}`);
+                    }
+
                     const result = await response.json();
+                    if (!result.choices || result.choices.length === 0) {
+                        throw new Error("Yanıt boş veya geçersiz");
+                    }
+                    
                     const extractedData = extractDataFromResponse(result.choices[0].text);
                     resolve(extractedData);
                 } catch (error) {
@@ -80,7 +88,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     reject(error);
                 }
             };
-            reader.readAsDataURL(file);  // Dosyayı base64 formatında okuyup işleme alıyoruz
+
+            // Dosya formatını kontrol edelim
+            if (file.type.startsWith("image/") || file.type === "application/pdf") {
+                reader.readAsDataURL(file);  // Dosyayı base64 formatında okuyup işleme alıyoruz
+            } else {
+                reject(new Error("Desteklenmeyen dosya formatı! Sadece PDF ve görüntü dosyaları yüklenebilir."));
+            }
         });
     }
 
