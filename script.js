@@ -1,20 +1,29 @@
 function extractDetails(text) {
-    const nameRegex = /([A-Z][a-zA-Z]+(\s[A-Z][a-zA-Z]+)+)/g; // İsim ve soyisimler
-    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g; // E-posta
+    const companyRegex = /([A-Z][a-zA-Z]+(\s[A-Z][a-zA-Z]+)+)/g; // Şirket adları
+    const nameRegex = /Dr\.?\s?[A-Z][a-z]+(?:\s[A-Z][a-z]+)?/g; // İsim ve soyisim
+    const positionRegex = /(Manager|Director|Engineer|Specialist)/g; // Pozisyon
     const phoneRegex = /(\+?[0-9\-\s().]+)/g; // Telefon numarası
-    const websiteRegex = /(www\.[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g; // Web siteleri
+    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g; // E-posta adresi
+    const cityCountryRegex = /(Jeddah|Saudi Arabia|UAE|United Arab Emirates)/g; // Şehir ve ülke tanıma
 
-    const names = text.match(nameRegex) || [];
-    const emails = text.match(emailRegex) || [];
+    // Verileri yakala
+    const companies = text.match(companyRegex) || [];
+    const names = text.match(nameRegex) || ["Responsible"];
+    const positions = text.match(positionRegex) || ["Responsible"];
     const phones = text.match(phoneRegex).filter(phone => phone.trim().length > 4) || [];
-    const websites = text.match(websiteRegex) || [];
+    const emails = text.match(emailRegex) || [];
+    const citiesCountries = text.match(cityCountryRegex) || ["Unknown"];
 
     // Her bir veri tipini tablo için formatla
-    const data = names.map((name, index) => ({
-        "Name": name || "",
-        "Email": emails[index] || "",
+    const data = companies.map((company, index) => ({
+        "Company": company || "",
+        "Name": names[index] || "Responsible",
+        "Surname": ".", // Soyadını yakalayamadığımız durumda varsayılan değer
+        "Position": positions[index] || "Responsible",
         "Phone": phones[index] || "",
-        "Website": websites[index] || ""
+        "Email": emails[index] || "",
+        "City": citiesCountries[index] || "Unknown",
+        "Country": citiesCountries[index + 1] || "Unknown"
     }));
 
     return data;
@@ -37,7 +46,7 @@ document.getElementById('upload').onchange = function(event) {
             // Tabloda verileri göster
             const table = document.createElement('table');
             table.setAttribute('border', '1');
-            const headers = ["Name", "Email", "Phone", "Website"];
+            const headers = ["Company", "Name", "Surname", "Position", "Phone", "Email", "City", "Country"];
             const headerRow = table.insertRow(0);
             headers.forEach(header => {
                 const cell = headerRow.insertCell();
