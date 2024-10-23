@@ -1,74 +1,160 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Card Reader App</title>
-    
-    <!-- Harici CSS için bağlantı -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css">
-    <link rel="stylesheet" href="style.css">
-
-    <!-- Tesseract.js ve DataTables -->
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@v2.1.4/dist/tesseract.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
-
-    <!-- jsPDF ve XLSX -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+    <title>Veri İşleme ve Tablo Oluşturma</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .upload-area {
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .progress-container {
+            width: 100%;
+            background-color: #f2f2f2;
+            margin-bottom: 20px;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 30px;
+            background-color: #4caf50;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+        }
+        .download-buttons {
+            margin-top: 20px;
+        }
+        .filterable th {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <div class="card shadow-lg">
-            <div class="card-body text-center">
-                <h1 class="display-6">Card Reader App</h1>
-                <p>Upload your files here to extract information.</p>
 
-                <!-- Dosya seçme alanı -->
-                <input type="file" id="upload" accept="image/*" multiple class="form-control mb-3">
-                
-                <!-- Başlat ve ChatGPT ile analiz et butonları -->
-                <button id="start" class="btn btn-primary btn-lg">
-                    <i class="fas fa-upload"></i> Başlat
-                </button>
-                <button id="startChatGPT" class="btn btn-secondary btn-lg">
-                    <i class="fas fa-robot"></i> ChatGPT ile Analiz Et
-                </button>
-                
-                <!-- Görsel göster/gizle butonu -->
-                <button id="toggleImage" class="btn btn-info btn-lg">
-                    <i class="fas fa-eye"></i> Görseli Göster/Gizle
-                </button>
-                
-                <!-- İlerleme barı ve metni -->
-                <div class="progress mt-3">
-                    <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-                </div>
-                <p id="progressText" class="mt-2">İşlem bekleniyor...</p>
-            </div>
-        </div>
+    <h1>Dosya Yükleme ve Tablo Oluşturma</h1>
 
-        <!-- OCR ve ChatGPT çıktıları -->
-        <div id="output" class="mt-5"></div>
-        <div id="chatgpt-output" class="mt-5"></div>
-        
-        <!-- Görsel önizleme -->
-        <div id="imagePreview">
-            <img id="uploadedImage" alt="Yüklenen görsel" style="max-width: 100%; display: none; margin: 20px auto;" />
-        </div>
-
-        <!-- Dışa aktarma butonları -->
-        <div class="mt-3">
-            <button id="exportExcelBtn" class="btn btn-success mt-3">Excel Olarak İndir</button>
-            <button id="exportPdfBtn" class="btn btn-danger mt-3">PDF Olarak İndir</button>
-        </div>
+    <div class="upload-area">
+        <label for="file-upload">Dosyaları Yükleyin (PDF veya JPG):</label>
+        <input type="file" id="file-upload" multiple accept=".pdf, .jpg, .jpeg, .png">
     </div>
 
-    <!-- Script bağlantıları -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
-    <script src="script.js"></script>
+    <div class="progress-container">
+        <div class="progress-bar" id="progress-bar">0%</div>
+    </div>
+
+    <h2>İşlenen Veriler:</h2>
+    <table id="data-table" class="filterable">
+        <thead>
+            <tr>
+                <th>Şirketin Adı</th>
+                <th>Kişinin Adı</th>
+                <th>Kişinin Soyadı</th>
+                <th>Kişinin Pozisyonu</th>
+                <th>Kişinin Numarası</th>
+                <th>Şirketin Numarası</th>
+                <th>Kişinin Mail Adresi</th>
+                <th>Şirketin Mail Adresi</th>
+                <th>Şehir</th>
+                <th>Ülke</th>
+                <th>Website</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Tarama sonrası veriler buraya gelecek -->
+        </tbody>
+    </table>
+
+    <div class="download-buttons">
+        <button id="download-excel">Excel Olarak İndir</button>
+        <button id="download-pdf">PDF Olarak İndir</button>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-upload');
+        const progressBar = document.getElementById('progress-bar');
+        
+        // Dosya yüklendiğinde ilerleme çubuğunu göster
+        fileInput.addEventListener('change', function(event) {
+            const files = event.target.files;
+            const totalFiles = files.length;
+            let uploadedFiles = 0;
+
+            const interval = setInterval(() => {
+                uploadedFiles++;
+                const progress = (uploadedFiles / totalFiles) * 100;
+                progressBar.style.width = progress + '%';
+                progressBar.innerText = Math.floor(progress) + '%';
+                if (progress >= 100) {
+                    clearInterval(interval);
+                }
+            }, 500); // Test amacıyla her 500ms'de ilerliyor
+
+            // Burada dosya işlemleri yapılacak (API entegrasyonu ile tarama vs.)
+        });
+
+        // Filtre ve sıralama fonksiyonu (basit)
+        document.querySelectorAll('.filterable th').forEach(headerCell => {
+            headerCell.addEventListener('click', () => {
+                const tableElement = headerCell.parentElement.parentElement.parentElement;
+                const headerIndex = Array.prototype.indexOf.call(headerCell.parentElement.children, headerCell);
+                const currentIsAscending = headerCell.classList.contains('th-sort-asc');
+
+                sortTableByColumn(tableElement, headerIndex, !currentIsAscending);
+            });
+        });
+
+        function sortTableByColumn(table, column, asc = true) {
+            const dirModifier = asc ? 1 : -1;
+            const rows = Array.from(table.querySelectorAll('tbody tr'));
+
+            const sortedRows = rows.sort((a, b) => {
+                const aColText = a.querySelector(`td:nth-child(${column + 1})`).textContent.trim();
+                const bColText = b.querySelector(`td:nth-child(${column + 1})`).textContent.trim();
+
+                return aColText > bColText ? (1 * dirModifier) : (-1 * dirModifier);
+            });
+
+            while (table.querySelector('tbody').firstChild) {
+                table.querySelector('tbody').removeChild(table.querySelector('tbody').firstChild);
+            }
+
+            table.querySelector('tbody').append(...sortedRows);
+
+            table.querySelectorAll('th').forEach(th => th.classList.remove('th-sort-asc', 'th-sort-desc'));
+            headerCell.classList.toggle('th-sort-asc', asc);
+            headerCell.classList.toggle('th-sort-desc', !asc);
+        }
+        
+        // Excel ve PDF indirme butonları (işlevsellik daha sonra eklenecek)
+        document.getElementById('download-excel').addEventListener('click', function() {
+            alert('Excel olarak indirilecek');
+        });
+
+        document.getElementById('download-pdf').addEventListener('click', function() {
+            alert('PDF olarak indirilecek');
+        });
+    </script>
+
 </body>
 </html>
