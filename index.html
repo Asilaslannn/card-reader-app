@@ -7,8 +7,10 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
             background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            color: #333;
         }
         h1 {
             text-align: center;
@@ -49,6 +51,25 @@
             color: white;
             transition: width 0.4s ease;
         }
+        button {
+            display: inline-block;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            margin: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
         table {
             width: 100%;
             max-width: 1000px;
@@ -79,23 +100,25 @@
             text-align: center;
             margin-top: 20px;
         }
-        button {
+        .download-buttons button {
             background-color: #4caf50;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 20px;
             margin: 10px;
             font-size: 16px;
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
-        button:hover {
+        .download-buttons button:hover {
             background-color: #45a049;
         }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
+        .download-buttons button:focus {
+            outline: none;
+        }
+        .download-buttons button:active {
+            background-color: #388e3c;
         }
     </style>
 </head>
