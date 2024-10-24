@@ -17,13 +17,7 @@ h1 {
     margin-bottom: 30px;
 }
 
-.upload-area label {
-    font-size: 16px;
-    font-weight: bold;
-}
-
 .upload-area input[type="file"] {
-    margin-top: 10px;
     font-size: 16px;
     padding: 10px;
     border-radius: 5px;
@@ -32,45 +26,14 @@ h1 {
     max-width: 600px;
 }
 
-.progress-container {
-    width: 80%;
-    max-width: 600px;
-    margin: 20px auto;
-    background-color: #e0e0e0;
-    border-radius: 10px;
-}
-
-.progress-bar {
-    width: 0%;
-    height: 30px;
-    background-color: #4caf50;
-    border-radius: 10px;
-    text-align: center;
-    line-height: 30px;
-    color: white;
-    transition: width 0.4s ease;
-}
-
-button {
-    display: inline-block;
-    background-color: #4caf50;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    margin: 10px;
-    font-size: 16px;
+pre {
+    background-color: #f9f9f9;
+    padding: 10px;
     border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-button:hover {
-    background-color: #45a049;
-}
-
-button:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
+    border: 1px solid #ccc;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin: 20px 0;
 }
 
 table {
@@ -105,12 +68,8 @@ tr:hover {
     background-color: #f1f1f1;
 }
 
-.download-buttons {
-    text-align: center;
-    margin-top: 20px;
-}
-
-.download-buttons button {
+button {
+    display: inline-block;
     background-color: #4caf50;
     color: white;
     border: none;
@@ -122,14 +81,6 @@ tr:hover {
     transition: background-color 0.3s ease;
 }
 
-.download-buttons button:hover {
+button:hover {
     background-color: #45a049;
-}
-
-.download-buttons button:focus {
-    outline: none;
-}
-
-.download-buttons button:active {
-    background-color: #388e3c;
 }
