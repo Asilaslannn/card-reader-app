@@ -1,24 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
-    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Card Reader App</title>
+        <link rel="stylesheet" href="style.css">
+        <script src="https://cdn.jsdelivr.net/npm/tesseract.js@v2.1.4/dist/tesseract.min.js"></script>
+        <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    </head>
+    <body>
+        <h1>Card Reader App</h1>
+        <p>Upload your files here:</p>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Card Reader App</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@v2.1.4/dist/tesseract.min.js"></script>
-</head>
-<body>
-    <h1>Card Reader App</h1>
-    <p>Upload your files here.</p>
+        <!-- Dosya yükleme alanı -->
+        <div class="upload-area">
+            <input type="file" id="upload" accept="image/*,application/pdf">
+        </div>
 
-    <!-- Dosya yükleme alanı -->
-    <input type="file" id="upload" accept="image/*,application/pdf">
+        <!-- OCR ile çıkan metni göstermek için -->
+        <pre id="output"></pre>
 
-    <!-- OCR ile çıkan metni göstermek için -->
-    <pre id="output"></pre>
+        <div id="table-container"></div>
 
-    <script src="script.js"></script>
-</body>
+        <script src="script.js"></script>
+    </body>
 </html>
