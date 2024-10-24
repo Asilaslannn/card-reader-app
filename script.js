@@ -76,31 +76,28 @@ function processFile(file) {
 }
 
 function extractDetails(text) {
-    const companyRegex = /(?:Company|Firma|Şirket|Name):?\s*([A-Z][a-zA-Z\s]+)/g; // Şirket adı
-    const nameRegex = /([A-Z][a-zA-Z]+)\s([A-Z][a-zA-Z]+)/g; // İsim ve soyisim
+    const companyAndNameRegex = /([A-Z][a-z]+\s[A-Z][a-z]+(?:\s[A-Z][a-z]+)?)/g; // Çoklu kelimelerden oluşan isim/şirket adı (örnek: Chat GPT Ltd)
     const positionRegex = /(Manager|Director|CEO|CFO|Engineer|Technician|Specialist|Assistant|Owner)/i; // Pozisyon
     const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g; // E-posta
     const phoneRegex = /(\+?[0-9\-\s().]+)/g; // Telefon numarası
     const websiteRegex = /(www\.[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g; // Web siteleri
     const cityCountryRegex = /(City|Şehir|Country|Ülke):?\s*([A-Za-z\s]+)/g; // Şehir ve ülke
 
-    const companies = text.match(companyRegex) || ["NULL"];
-    const names = [...text.matchAll(nameRegex)] || [["NULL", "NULL"]];
+    // Çoklu kelimelerden oluşan şirket adı ve isimleri algıla
+    const companyAndNames = text.match(companyAndNameRegex) || ["NULL"];
     const emails = text.match(emailRegex) || ["NULL"];
     const phones = text.match(phoneRegex).filter(phone => phone.trim().length > 4) || ["NULL"];
     const websites = text.match(websiteRegex) || ["NULL"];
     const positions = text.match(positionRegex) || ["NULL"];
     const locations = [...text.matchAll(cityCountryRegex)] || [["NULL", "NULL"]];
 
-    const data = names.map((name, index) => ({
-        "Company": companies[index] || "NULL",
-        "First Name": name[1] || "NULL",
-        "Last Name": name[2] || "NULL",
+    const data = companyAndNames.map((name, index) => ({
+        "Company/Name": name || "NULL", // Şirket ismi veya kişi ismi olarak aynı regex kullanılabilir
         "Position": positions[index] || "NULL",
         "Person Phone": phones[index] || "NULL",
-        "Company Phone": phones[index + 1] || "NULL", // Şirket telefonu olarak ikinci telefon
+        "Company Phone": phones[index + 1] || "NULL", // Şirket telefonu
         "Person Email": emails[index] || "NULL",
-        "Company Email": emails[index + 1] || "NULL", // Şirket e-postası olarak ikinci e-posta
+        "Company Email": emails[index + 1] || "NULL", // Şirket e-postası
         "Website": websites[index] || "NULL",
         "City": locations[index] ? locations[index][1] : "NULL",
         "Country": locations[index] ? locations[index][2] : "NULL"
@@ -115,7 +112,7 @@ function displayTable(extractedData) {
 
     const table = document.createElement('table');
     table.setAttribute('border', '1');
-    const headers = ["Company", "First Name", "Last Name", "Position", "Person Phone", "Company Phone", "Person Email", "Company Email", "Website", "City", "Country"];
+    const headers = ["Company/Name", "Position", "Person Phone", "Company Phone", "Person Email", "Company Email", "Website", "City", "Country"];
     const headerRow = table.insertRow(0);
     headers.forEach(header => {
         const cell = headerRow.insertCell();
