@@ -1,155 +1,71 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const fileInput = document.getElementById('file-upload');
-    const progressBar = document.getElementById('progress-bar');
-    const startProcessButton = document.getElementById('start-process');
-    const dataTable = document.getElementById('data-table').getElementsByTagName('tbody')[0];
-    let uploadedFiles = [];
+function extractDetails(text) {
+    const nameRegex = /([A-Z][a-zA-Z]+(\s[A-Z][a-zA-Z]+)+)/g; // İsim ve soyisimler
+    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g; // E-posta
+    const phoneRegex = /(\+?[0-9\-\s().]+)/g; // Telefon numarası
+    const websiteRegex = /(www\.[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g; // Web siteleri
 
-    // OpenAI API anahtarı (güvenli bir sunucuda saklanmalı)
-    const apiKey = "sk-RO0Pr2EW4Acg3SIk3R0CBZ1sfBNwQVPXRtPhwodVCtT3BlbkFJ4ppPQzIIBnO6U6mpEUdmCSmfKXj0ntgAvBtestsjEA";
+    const names = text.match(nameRegex) || [];
+    const emails = text.match(emailRegex) || [];
+    const phones = text.match(phoneRegex).filter(phone => phone.trim().length > 4) || [];
+    const websites = text.match(websiteRegex) || [];
 
-    // Dosya yüklendiğinde "Başlat" butonunu aktif et
-    fileInput.addEventListener('change', function (event) {
-        uploadedFiles = event.target.files;
-        if (uploadedFiles.length > 0) {
-            startProcessButton.disabled = false;
-        } else {
-            startProcessButton.disabled = true;
-        }
-    });
+    // Her bir veri tipini tablo için formatla
+    const data = names.map((name, index) => ({
+        "Name": name || "",
+        "Email": emails[index] || "",
+        "Phone": phones[index] || "",
+        "Website": websites[index] || ""
+    }));
 
-    // "Başlat" butonuna basıldığında işlemi başlat
-    startProcessButton.addEventListener('click', function () {
-        if (uploadedFiles.length === 0) {
-            alert("Lütfen dosya yükleyin!");
-            return;
-        }
+    return data;
+}
 
-        progressBar.style.width = '0%';
-        progressBar.innerText = '0%';
-        let totalFiles = uploadedFiles.length;
-        let processedFiles = 0;
-
-        Array.from(uploadedFiles).forEach((file, index) => {
-            processFile(file).then(data => {
-                // İşlenen verileri tabloya ekle
-                addToTable(data);
-                processedFiles++;
-                updateProgressBar(processedFiles, totalFiles);
-            }).catch(error => {
-                console.error("Hata oluştu:", error);
-                alert("Dosya işlenirken bir hata meydana geldi. Lütfen tekrar deneyin.");
-            });
-        });
-    });
-
-    // İlerleme çubuğunu güncelle
-    function updateProgressBar(processed, total) {
-        const progress = (processed / total) * 100;
-        progressBar.style.width = progress + '%';
-        progressBar.innerText = Math.floor(progress) + '%';
-    }
-
-    // Dosya işleme ve ChatGPT'den veri alma
-    async function processFile(file) {
-        const reader = new FileReader();
-
-        return new Promise((resolve, reject) => {
-            reader.onload = async function (event) {
-                const base64Data = event.target.result.split(',')[1];
-
-                try {
-                    const response = await fetch('https://api.openai.com/v1/completions', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${apiKey}`
-                        },
-                        body: JSON.stringify({
-                            model: "gpt-3.5-turbo",
-                            prompt: `Bu kartvizitten şu bilgileri çıkart: Şirketin Adı, Kişinin Adı, Kişinin Soyadı, Kişinin Pozisyonu, Kişinin Numarası, Şirketin Numarası, Kişinin Mail Adresi, Şirketin Mail Adresi, Şehir, Ülke, Website. Eğer kartvizitte eksik bilgi varsa varsayılan olarak 'Responsible' ya da '.' koy.`,
-                            max_tokens: 500
-                        })
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`API isteği başarısız: ${response.statusText}`);
-                    }
-
-                    const result = await response.json();
-                    if (!result.choices || result.choices.length === 0) {
-                        throw new Error("Yanıt boş veya geçersiz");
-                    }
-                    
-                    const extractedData = extractDataFromResponse(result.choices[0].text);
-                    resolve(extractedData);
-                } catch (error) {
-                    console.error("API ile bağlantı sırasında hata:", error);
-                    reject(error);
-                }
-            };
-
-            // Dosya formatını kontrol edelim
-            if (file.type.startsWith("image/") || file.type === "application/pdf") {
-                reader.readAsDataURL(file);  // Dosyayı base64 formatında okuyup işleme alıyoruz
-            } else {
-                reject(new Error("Desteklenmeyen dosya formatı! Sadece PDF ve görüntü dosyaları yüklenebilir."));
+document.getElementById('upload').onchange = function(event) {
+    const file = event.target.files[0];
+    if (file) {
+        Tesseract.recognize(
+            file,
+            'eng',
+            {
+                logger: (m) => console.log(m),
             }
+        ).then(({ data: { text } }) => {
+            const extractedData = extractDetails(text);
+            console.log("Extracted Data:", extractedData);
+            document.getElementById('output').innerText = JSON.stringify(extractedData, null, 2);
+
+            // Tabloda verileri göster
+            const table = document.createElement('table');
+            table.setAttribute('border', '1');
+            const headers = ["Name", "Email", "Phone", "Website"];
+            const headerRow = table.insertRow(0);
+            headers.forEach(header => {
+                const cell = headerRow.insertCell();
+                cell.textContent = header;
+            });
+
+            extractedData.forEach((rowData, rowIndex) => {
+                const row = table.insertRow(rowIndex + 1);
+                headers.forEach((header, cellIndex) => {
+                    const cell = row.insertCell(cellIndex);
+                    cell.textContent = rowData[header];
+                });
+            });
+
+            document.body.appendChild(table);
+
+            // Excel'e yazma butonunu ekle
+            const exportButton = document.createElement("button");
+            exportButton.innerText = "Export to Excel";
+            exportButton.onclick = () => exportToExcel(extractedData);
+            document.body.appendChild(exportButton);
         });
     }
+};
 
-    // ChatGPT'den dönen yanıtı tabloya uygun şekilde ayır
-    function extractDataFromResponse(text) {
-        const lines = text.split('\n').map(line => line.trim());
-        return {
-            company: lines[0] || 'Unknown',
-            firstName: lines[1] || 'Responsible',
-            lastName: lines[2] || '.',
-            position: lines[3] || 'Responsible',
-            personPhone: lines[4] || '',
-            companyPhone: lines[5] || '',
-            personEmail: lines[6] || '',
-            companyEmail: lines[7] || '',
-            city: lines[8] || '',
-            country: lines[9] || '',
-            website: lines[10] || ''
-        };
-    }
-
-    // Verileri tabloya ekle
-    function addToTable(data) {
-        const row = dataTable.insertRow();
-        row.insertCell(0).innerText = data.company;
-        row.insertCell(1).innerText = data.firstName;
-        row.insertCell(2).innerText = data.lastName;
-        row.insertCell(3).innerText = data.position;
-        row.insertCell(4).innerText = data.personPhone;
-        row.insertCell(5).innerText = data.companyPhone;
-        row.insertCell(6).innerText = data.personEmail;
-        row.insertCell(7).innerText = data.companyEmail;
-        row.insertCell(8).innerText = data.city;
-        row.insertCell(9).innerText = data.country;
-        row.insertCell(10).innerText = data.website;
-    }
-
-    // Excel indirme işlemi
-    document.getElementById('download-excel').addEventListener('click', function () {
-        const table = document.getElementById('data-table');
-        const rows = Array.from(table.rows).map(row => Array.from(row.cells).map(cell => cell.innerText));
-
-        let csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement('a');
-        link.setAttribute('href', encodedUri);
-        link.setAttribute('download', 'data_table.csv');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    });
-
-    // PDF indirme işlemi (html2pdf kütüphanesi ile yapılabilir)
-    document.getElementById('download-pdf').addEventListener('click', function () {
-        const element = document.getElementById('data-table');
-        html2pdf().from(element).save('data_table.pdf');
-    });
-});
+function exportToExcel(data) {
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+    XLSX.writeFile(workbook, "OCR_Data.xlsx");
+}
