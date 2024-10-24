@@ -1,20 +1,32 @@
 function extractDetails(text) {
-    const nameRegex = /([A-Z][a-zA-Z]+(\s[A-Z][a-zA-Z]+)+)/g; // İsim ve soyisimler
+    const companyRegex = /(?:Company|Firma|Şirket|Name):?\s*([A-Z][a-zA-Z\s]+)/g; // Şirket adı
+    const nameRegex = /([A-Z][a-zA-Z]+)\s([A-Z][a-zA-Z]+)/g; // İsim ve soyisim
+    const positionRegex = /(Manager|Director|CEO|CFO|Engineer|Technician|Specialist|Assistant|Owner)/i; // Pozisyon
     const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g; // E-posta
     const phoneRegex = /(\+?[0-9\-\s().]+)/g; // Telefon numarası
     const websiteRegex = /(www\.[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g; // Web siteleri
+    const cityCountryRegex = /(City|Şehir|Country|Ülke):?\s*([A-Za-z\s]+)/g; // Şehir ve ülke
 
-    const names = text.match(nameRegex) || [];
-    const emails = text.match(emailRegex) || [];
-    const phones = text.match(phoneRegex).filter(phone => phone.trim().length > 4) || [];
-    const websites = text.match(websiteRegex) || [];
+    const companies = text.match(companyRegex) || ["NULL"];
+    const names = [...text.matchAll(nameRegex)] || [["NULL", "NULL"]];
+    const emails = text.match(emailRegex) || ["NULL"];
+    const phones = text.match(phoneRegex).filter(phone => phone.trim().length > 4) || ["NULL"];
+    const websites = text.match(websiteRegex) || ["NULL"];
+    const positions = text.match(positionRegex) || ["NULL"];
+    const locations = [...text.matchAll(cityCountryRegex)] || [["NULL", "NULL"]];
 
-    // Her bir veri tipini tablo için formatla
     const data = names.map((name, index) => ({
-        "Name": name || "",
-        "Email": emails[index] || "",
-        "Phone": phones[index] || "",
-        "Website": websites[index] || ""
+        "Company": companies[index] || "NULL",
+        "First Name": name[1] || "NULL",
+        "Last Name": name[2] || "NULL",
+        "Position": positions[index] || "NULL",
+        "Person Phone": phones[index] || "NULL",
+        "Company Phone": phones[index + 1] || "NULL", // İkinci telefon numarasını şirket numarası olarak kabul ediyorum
+        "Person Email": emails[index] || "NULL",
+        "Company Email": emails[index + 1] || "NULL", // İkinci e-posta adresini şirket e-postası olarak kabul ediyorum
+        "Website": websites[index] || "NULL",
+        "City": locations[index] ? locations[index][1] : "NULL",
+        "Country": locations[index] ? locations[index][2] : "NULL"
     }));
 
     return data;
@@ -37,7 +49,7 @@ document.getElementById('upload').onchange = function(event) {
             // Tabloda verileri göster
             const table = document.createElement('table');
             table.setAttribute('border', '1');
-            const headers = ["Name", "Email", "Phone", "Website"];
+            const headers = ["Company", "First Name", "Last Name", "Position", "Person Phone", "Company Phone", "Person Email", "Company Email", "Website", "City", "Country"];
             const headerRow = table.insertRow(0);
             headers.forEach(header => {
                 const cell = headerRow.insertCell();
