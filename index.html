@@ -1,27 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Card Reader App</title>
-        <link rel="stylesheet" href="style.css">
-        <script src="https://cdn.jsdelivr.net/npm/tesseract.js@v2.1.4/dist/tesseract.min.js"></script>
-        <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
-    </head>
-    <body>
-        <h1>Card Reader App</h1>
-        <p>Upload your files here:</p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Reader App</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@v2.1.4/dist/tesseract.min.js"></script>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+    <h1>Card Reader App</h1>
+    <p>Upload your files here:</p>
 
-        <!-- Dosya yükleme alanı -->
-        <div class="upload-area">
-            <input type="file" id="upload" accept="image/*,application/pdf">
-        </div>
+    <!-- Dosya yükleme alanı -->
+    <div class="upload-area">
+        <input type="file" id="upload" accept="image/*,application/pdf">
+    </div>
 
-        <!-- OCR ile çıkan metni göstermek için -->
-        <pre id="output"></pre>
+    <!-- Görseli gösterme/gizleme ve başlat düğmesi -->
+    <div class="controls" style="display: none;">
+        <button id="toggleImage">Show Image</button>
+        <button id="startProcessing" disabled>Start</button>
+    </div>
 
-        <div id="table-container"></div>
+    <!-- İlerleme durumu göstergesi -->
+    <div class="progress-container" style="display: none;">
+        <div class="progress-bar" id="progressBar">0%</div>
+    </div>
 
-        <script src="script.js"></script>
-    </body>
+    <!-- Yüklenen görsel -->
+    <div id="imageContainer" style="display: none;">
+        <img id="uploadedImage" alt="Uploaded Image" style="max-width: 100%; height: auto;">
+    </div>
+
+    <!-- OCR sonucu metin gösterimi -->
+    <pre id="output"></pre>
+
+    <!-- Tablo alanı -->
+    <div id="table-container"></div>
+
+    <script src="script.js"></script>
+</body>
 </html>
