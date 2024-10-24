@@ -1,170 +1,24 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Veri Yükleme ve Tablo Oluşturma</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        .upload-area {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .upload-area label {
-            font-size: 16px;
-            font-weight: bold;
-        }
-        .upload-area input[type="file"] {
-            margin-top: 10px;
-            font-size: 16px;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            width: 80%;
-            max-width: 600px;
-        }
-        .progress-container {
-            width: 80%;
-            max-width: 600px;
-            margin: 20px auto;
-            background-color: #e0e0e0;
-            border-radius: 10px;
-        }
-        .progress-bar {
-            width: 0%;
-            height: 30px;
-            background-color: #4caf50;
-            border-radius: 10px;
-            text-align: center;
-            line-height: 30px;
-            color: white;
-            transition: width 0.4s ease;
-        }
-        button {
-            display: inline-block;
-            background-color: #4caf50;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            margin: 10px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        table {
-            width: 100%;
-            max-width: 1000px;
-            margin: 20px auto;
-            border-collapse: collapse;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            background-color: white;
-        }
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border: 1px solid #ddd;
-        }
-        th {
-            background-color: #f2f2f2;
-            cursor: pointer;
-        }
-        th:hover {
-            background-color: #ddd;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-        .download-buttons {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .download-buttons button {
-            background-color: #4caf50;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            margin: 10px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        .download-buttons button:hover {
-            background-color: #45a049;
-        }
-        .download-buttons button:focus {
-            outline: none;
-        }
-        .download-buttons button:active {
-            background-color: #388e3c;
-        }
-    </style>
+    <title>Card Reader App</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@v2.1.4/dist/tesseract.min.js"></script>
 </head>
 <body>
+    <h1>Card Reader App</h1>
+    <p>Upload your files here.</p>
 
-    <h1>Dosya Yükleme ve Tablo Oluşturma</h1>
+    <!-- Dosya yükleme alanı -->
+    <input type="file" id="upload" accept="image/*,application/pdf">
 
-    <div class="upload-area">
-        <label for="file-upload">Dosyaları Yükleyin (PDF veya JPG):</label>
-        <input type="file" id="file-upload" multiple accept=".pdf, .jpg, .jpeg, .png">
-    </div>
-
-    <div class="progress-container">
-        <div class="progress-bar" id="progress-bar">0%</div>
-    </div>
-
-    <button id="start-process" disabled>Başlat</button>
-
-    <h2>İşlenen Veriler:</h2>
-    <table id="data-table">
-        <thead>
-            <tr>
-                <th>Şirketin Adı</th>
-                <th>Kişinin Adı</th>
-                <th>Kişinin Soyadı</th>
-                <th>Kişinin Pozisyonu</th>
-                <th>Kişinin Numarası</th>
-                <th>Şirketin Numarası</th>
-                <th>Kişinin Mail Adresi</th>
-                <th>Şirketin Mail Adresi</th>
-                <th>Şehir</th>
-                <th>Ülke</th>
-                <th>Website</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Veriler buraya eklenecek -->
-        </tbody>
-    </table>
-
-    <div class="download-buttons">
-        <button id="download-excel">Excel Olarak İndir</button>
-        <button id="download-pdf">PDF Olarak İndir</button>
-    </div>
+    <!-- OCR ile çıkan metni göstermek için -->
+    <pre id="output"></pre>
 
     <script src="script.js"></script>
-
 </body>
 </html>
